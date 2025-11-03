@@ -1,0 +1,44 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+.vscode/
+
+# NuGet packages
+*.nupkg
+packages/
+*.snupkg
+
+# Logs and database
+*.log
+*.db
+*.sqlite
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Debug and crash reports
+*.pdb
+*.cache
+*.sdf
+
+# ASP.NET specific
+appsettings.Development.json
+appsettings.Local.json
+
+# Rider IDE
+.idea/
+
+# Others
+Thumbs.db
+Desktop.ini
