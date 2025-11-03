@@ -1,0 +1,57 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\viole\\Fontys\\Semester2\\Projects\\Individual project\\Quiz Mastery\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{DBC4C639-8446-4BB1-BC0F-E518CECA685C}|Data\\Data.csproj|c:\\users\\viole\\fontys\\semester2\\projects\\individual project\\quiz mastery\\data\\dbconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DBC4C639-8446-4BB1-BC0F-E518CECA685C}|Data\\Data.csproj|solutionrelative:data\\dbconnection.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EE898CB3-AF8A-4CFB-B8E5-ED3425D145A2}|Logic\\Logic.csproj|c:\\users\\viole\\fontys\\semester2\\projects\\individual project\\quiz mastery\\logic\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EE898CB3-AF8A-4CFB-B8E5-ED3425D145A2}|Logic\\Logic.csproj|solutionrelative:logic\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DBConnection.cs",
+              "DocumentMoniker": "C:\\Users\\viole\\Fontys\\Semester2\\Projects\\Individual project\\Quiz Mastery\\Data\\DBConnection.cs",
+              "RelativeDocumentMoniker": "Data\\DBConnection.cs",
+              "ToolTip": "C:\\Users\\viole\\Fontys\\Semester2\\Projects\\Individual project\\Quiz Mastery\\Data\\DBConnection.cs",
+              "RelativeToolTip": "Data\\DBConnection.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-28T08:53:00.899Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "C:\\Users\\viole\\Fontys\\Semester2\\Projects\\Individual project\\Quiz Mastery\\Logic\\Class1.cs",
+              "RelativeDocumentMoniker": "Logic\\Class1.cs",
+              "ToolTip": "C:\\Users\\viole\\Fontys\\Semester2\\Projects\\Individual project\\Quiz Mastery\\Logic\\Class1.cs",
+              "RelativeToolTip": "Logic\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-28T08:52:08.568Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
