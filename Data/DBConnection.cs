@@ -1,9 +1,7 @@
-﻿namespace Data
-{
-    public class DBConnection
-    {
-        static string connectionString = "ммммммммммммммммммм" +
-            "" +
-            "";
-    }
-}
+﻿//namespace Data
+//{
+//    //public class DBConnection
+//    //{
+//    //    static string connectionString = "";
+//    //}
+//}
