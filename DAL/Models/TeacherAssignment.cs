@@ -9,7 +9,7 @@ namespace DAL.Models
     public class TeacherAssignment
     {
         public int Id { get; set; }
-        public int TeacherId { get; set; }
+        public string TeacherId { get; set; }
         public int QuizId { get; set; }
         public DateTime CreatedAt { get; set; }
 

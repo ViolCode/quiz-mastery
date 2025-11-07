@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace DAL.Models
 {
-    public class ApplicationUser : IdentityUser<int>
+    public class ApplicationUser : IdentityUser
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public DateTime CreatedAt { get; set; } 
 
     }
 }

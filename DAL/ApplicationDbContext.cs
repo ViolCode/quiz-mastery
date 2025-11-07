@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DAL
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<int>, int>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -23,11 +23,25 @@ namespace DAL
         public DbSet<TeacherAssignment> TeacherAssignments { get; set; }
         public DbSet<StudentAssignment> StudentAssignments { get; set; }
 
-
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            var teacher = new IdentityRole
+            {
+                Id = "ROLE_TEACHER",
+                Name = "teacher",
+                NormalizedName = "TEACHER"
+            };
+
+            var student = new IdentityRole
+            {
+                Id = "ROLE_STUDENT", 
+                Name = "student",
+                NormalizedName = "STUDENT"
+            };
+
+            builder.Entity<IdentityRole>().HasData(teacher, student);
 
             //Define relationships matching your ERD
 
