@@ -1,5 +1,5 @@
 ﻿using BLL.DTOs;
-using DAL.Models; // Only BLL references DAL
+using DAL.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace BLL.Services
