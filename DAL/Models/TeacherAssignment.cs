@@ -13,7 +13,7 @@ namespace DAL.Models
         public int QuizId { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        public ApplicationUser Teacher { get; set; }
+        public User Teacher { get; set; }
         public Quiz Quiz { get; set; }
         public ICollection<StudentAssignment> StudentAssignments { get; set; }
     }

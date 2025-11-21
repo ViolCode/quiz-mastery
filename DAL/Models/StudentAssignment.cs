@@ -13,7 +13,7 @@ namespace DAL.Models
         public int AssignmentId { get; set; }
         public DateTime AssignedAt { get; set; }
 
-        public ApplicationUser Student { get; set; }
+        public User Student { get; set; }
         public TeacherAssignment Assignment { get; set; }
         public ICollection<Answer> Answers { get; set; }
     }
