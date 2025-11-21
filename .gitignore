@@ -3,7 +3,7 @@ bin/
 obj/
 
 # LibMan library files
-wwwroot/lib/
+PL/wwwroot
 
 # User-specific files
 *.user
