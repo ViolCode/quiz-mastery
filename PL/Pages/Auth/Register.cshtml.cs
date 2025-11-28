@@ -17,6 +17,9 @@ namespace PL.Pages.Auth
         [BindProperty]
         public UserDto RegisterUser { get; set; } = new UserDto();
 
+        [BindProperty]
+        public string ConfirmPassword { get; set; } = "";
+
         public RegisterModel(IUserService userService)
         {
             _userService = userService;
@@ -57,6 +60,12 @@ namespace PL.Pages.Auth
             if (!ModelState.IsValid) 
             { 
                 return Page(); 
+            }
+
+            if (RegisterUser.PasswordHash != ConfirmPassword)
+            {
+                ModelState.AddModelError("ConfirmPassword", "Passwords do not match.");
+                return Page();
             }
 
             if (!PasswordValidator.IsValidPassword(RegisterUser.PasswordHash))

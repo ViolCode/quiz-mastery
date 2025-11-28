@@ -22,6 +22,12 @@
                 <div class="mb-3">
                     <label>Password</label>
                     <input asp-for="RegisterUser.PasswordHash" type="password" class="form-control" required />
+                    <span asp-validation-for="RegisterUser.PasswordHash"></span>
+                </div>
+                <div class="mb-3">
+                    <label>Confirm Password</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" required />
+                    <span asp-validation-for="ConfirmPassword"></span>
                 </div>
                 <div class="mb-3">
                     <label>Role</label>
