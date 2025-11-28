@@ -22,7 +22,7 @@ namespace PL.Pages
             var email = HttpContext.Session.GetString("UserEmail");
             if (string.IsNullOrEmpty(email))
             {
-                return RedirectToPage("/Auth/Register");
+                return RedirectToPage("/Auth/Login");
             }
 
             CurrentUser = _userAccess.GetUserByEmail(email); 

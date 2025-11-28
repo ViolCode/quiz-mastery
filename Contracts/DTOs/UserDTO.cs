@@ -10,7 +10,7 @@ namespace Contracts.DTOs
     public class UserDto
     {
         public int Id { get; set; }
-        [Required(ErrorMessage = "Name is required")]
+        [Required]
         public string Name { get; set; }
         [Required]
         public string Email { get; set; }

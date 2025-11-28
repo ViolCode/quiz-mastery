@@ -11,40 +11,35 @@
             <form method="post" novalidate>
                 <div class="mb-3">
                     <label>Name</label>
-                    <input asp-for="User.Name" class="form-control" required />
-                    <span asp-validation-for="User.Name"></span>
+                    <input asp-for="RegisterUser.Name" class="form-control" required />
+                    <span asp-validation-for="RegisterUser.Name"></span>
                 </div>
                 <div class="mb-3">
                     <label>Email</label>
-                    <input asp-for="User.Email" class="form-control" required />
-                    <span asp-validation-for="User.Email"></span>
+                    <input asp-for="RegisterUser.Email" class="form-control" required />
+                    <span asp-validation-for="RegisterUser.Email"></span>
                 </div>
                 <div class="mb-3">
                     <label>Password</label>
-                    <input asp-for="User.PasswordHash" type="password" class="form-control" required />
+                    <input asp-for="RegisterUser.PasswordHash" type="password" class="form-control" required />
                 </div>
                 <div class="mb-3">
                     <label>Role</label>
-                    <select asp-for="User.RoleId" asp-items="Model.Roles" class="form-control"></select>
+                    <select asp-for="RegisterUser.RoleId" asp-items="Model.Roles" class="form-control"></select>
                 </div>
-
-
-                @if (typeof(Contracts.DTOs.UserDto).GetProperty("Role") != null)
-                {
-                    <div class="mb-3">
-                        <label>Role</label>
-                        <select asp-for="User.RoleId" class="form-control">
-                            <option value="Student">Student</option>
-                            <option value="Teacher">Teacher</option>
-                        </select>
-                    </div>
-                }
-
                 <button type="submit" class="btn btn-success w-100">Register</button>
             </form>
             <p class="mt-3 text-center">
                 <a asp-page="/Auth/Login">Already registered? Login</a>
             </p>
+            <div asp-validation-summary="All" class="text-danger"></div>
+            @if (TempData["Message"] != null)
+            {
+                <div class="alert alert-warning text-center">
+                    @TempData["Message"]
+                </div>
+            }
+
         </div>
     </div>
 </div>

@@ -5,13 +5,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthorization();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(60);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthentication("MyCookie")
+    .AddCookie("MyCookie", options =>
+    {
+        options.LoginPath = "/Auth/Login";  
+        options.LogoutPath = "/Auth/Logout"; 
+    });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -30,9 +40,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseSession();

@@ -1,6 +1,8 @@
 using Contracts.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 
 namespace PL.Pages.Auth
 {
@@ -16,20 +18,58 @@ namespace PL.Pages.Auth
         [BindProperty] public string Email { get; set; } = "";
         [BindProperty] public string Password { get; set; } = "";
 
-        public void OnGet() { }
-
-        public IActionResult OnPost()
+        public IActionResult OnGet()
         {
-            var user = _userService.Login(Email, Password);
-            if (user != null)
+            var role = User.FindFirstValue(ClaimTypes.Role);
+
+            if (!string.IsNullOrEmpty(role))
             {
-                HttpContext.Session.SetString("UserEmail", user.Email);
-                HttpContext.Session.SetString("UserName", user.Name);
-                HttpContext.Session.SetString("UserRole", user.RoleName ?? "");
-                return RedirectToPage("/Index");
+                if (role == "Student")
+                {
+                    TempData["Message"] = "You're already logged in as a student.";
+                    return RedirectToPage("/Student/StudentDashboard");
+                }
+                else if (role == "Teacher")
+                {
+                    TempData["Message"] = "You're already logged in as a teacher.";
+                    return RedirectToPage("/Teacher/TeacherDashboard");
+                }
             }
-            ModelState.AddModelError("", "Invalid credentials");
+
             return Page();
+        }
+
+        public async Task<IActionResult> OnPost()
+        {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            var user = _userService.Login(Email, Password);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid email or password.");
+                return Page();
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim(ClaimTypes.Role, user.RoleName ?? "")
+            };
+
+            var identity = new ClaimsIdentity(claims, "MyCookie");
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync("MyCookie", principal);
+
+            if (user.RoleName == "Teacher")
+                return RedirectToPage("/Teacher/TeacherDashboard");
+            else if (user.RoleName == "Student")
+                return RedirectToPage("/Student/StudentDashboard");
+
+            return RedirectToPage("/Auth/Register");
         }
     }
 }

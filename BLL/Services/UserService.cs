@@ -18,14 +18,6 @@ namespace BLL.Services
             _userAccess = userAccess;
         }
 
-        public UserDto? Login(string email, string password)
-        {
-            var user = _userAccess.GetUserByEmail(email);
-            if (user == null) return null;
-
-            return PasswordHasher.Verify(password, user.PasswordHash) ? user : null;
-        }
-
         public void Register(UserDto user)
         {
             user.PasswordHash = PasswordHasher.Hash(user.PasswordHash);
@@ -44,6 +36,19 @@ namespace BLL.Services
         public void DeleteAccount(int id)
         {
             _userAccess.DeleteUser(id);
+        }
+
+        public UserDto? Login(string email, string password)
+        {
+            var user = _userAccess.GetUserByEmail(email);
+            if (user == null) return null;
+
+            return PasswordHasher.Verify(password, user.PasswordHash) ? user : null;
+        }
+
+        public List<(int Id, string Name)> GetAllRoles()
+        {
+            return _userAccess.GetAllRoles();
         }
     }
 }
