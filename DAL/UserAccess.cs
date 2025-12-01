@@ -1,5 +1,7 @@
 ﻿using Contracts.DTOs;
+using Contracts.Enums;
 using Contracts.Interfaces;
+using DAL.Mappers;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -39,8 +41,7 @@ namespace DAL
                     Name = reader.GetString(1),
                     Email = reader.GetString(2),
                     PasswordHash = reader.GetString(3),
-                    RoleId = reader.GetInt32(4),
-                    RoleName = reader.GetString(5)
+                    Role = RoleMapper.FromId(reader.GetInt32(4))
                 };
             }
             return null;
@@ -55,7 +56,7 @@ namespace DAL
             cmd.Parameters.AddWithValue("@Name", user.Name);
             cmd.Parameters.AddWithValue("@Email", user.Email);
             cmd.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@Role", user.RoleId);
+            cmd.Parameters.AddWithValue("@Role", RoleMapper.ToId(user.Role));
             cmd.ExecuteNonQuery();
         }
 
@@ -69,7 +70,7 @@ namespace DAL
             cmd.Parameters.AddWithValue("@Name", user.Name);
             cmd.Parameters.AddWithValue("@Email", user.Email);
             cmd.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@Role", user.RoleId);
+            cmd.Parameters.AddWithValue("@Role", RoleMapper.ToId(user.Role));
             cmd.ExecuteNonQuery();
         }
 
@@ -116,8 +117,7 @@ namespace DAL
                     Name = reader.GetString(1),
                     Email = reader.GetString(2),
                     PasswordHash = reader.GetString(3),
-                    RoleId = reader.GetInt32(4),
-                    RoleName = reader.GetString(5)
+                    Role = RoleMapper.FromId(reader.GetInt32(4))
                 });
             }
             return users;

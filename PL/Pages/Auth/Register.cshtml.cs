@@ -1,5 +1,6 @@
 using BLL.Helpers;
 using Contracts.DTOs;
+using Contracts.Enums;
 using Contracts.Interfaces;
 using DAL;
 using Microsoft.AspNetCore.Mvc;
@@ -30,28 +31,30 @@ namespace PL.Pages.Auth
         public IActionResult OnGet()
         {
             var roles = _userService.GetAllRoles();
-            Roles = roles.Select(r => new SelectListItem
-            {
-                Value = r.Id.ToString(),
-                Text = r.Name
-            }).ToList();
-
-            var role = User.FindFirstValue(ClaimTypes.Role);
-
-            if (!string.IsNullOrEmpty(role))
-            {
-                if (role == "Student")
+            Roles = Enum.GetValues(typeof(Role))
+                .Cast<Role>()
+                .Select(r => new SelectListItem
                 {
-                    TempData["Message"] = "You're already logged in as a student.";
-                    return RedirectToPage("/Student/StudentDashboard");
-                }
-                else if (role == "Teacher")
+                    Value = ((int)r).ToString(),
+                    Text = r.ToString()
+                })
+                .ToList();
+
+            var roleClaim = User.FindFirstValue(ClaimTypes.Role);
+
+            if (!string.IsNullOrEmpty(roleClaim) && Enum.TryParse<Role>(roleClaim, out var role))
+            {
+                switch (role)
                 {
-                    TempData["Message"] = "You're already logged in as a teacher.";
-                    return RedirectToPage("/Teacher/TeacherDashboard");
+                    case Role.Student:
+                        TempData["Message"] = "You're already logged in as a student.";
+                        return RedirectToPage("/Student/StudentDashboard");
+
+                    case Role.Teacher:
+                        TempData["Message"] = "You're already logged in as a teacher.";
+                        return RedirectToPage("/Teacher/TeacherDashboard");
                 }
             }
-
             return Page();
         }
 

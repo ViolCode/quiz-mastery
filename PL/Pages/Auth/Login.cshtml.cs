@@ -1,3 +1,4 @@
+using Contracts.Enums;
 using Contracts.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
@@ -20,22 +21,21 @@ namespace PL.Pages.Auth
 
         public IActionResult OnGet()
         {
-            var role = User.FindFirstValue(ClaimTypes.Role);
+            var roleClaim = User.FindFirstValue(ClaimTypes.Role);
 
-            if (!string.IsNullOrEmpty(role))
+            if (!string.IsNullOrEmpty(roleClaim) && Enum.TryParse<Role>(roleClaim, out var role))
             {
-                if (role == "Student")
+                switch (role)
                 {
-                    TempData["Message"] = "You're already logged in as a student.";
-                    return RedirectToPage("/Student/StudentDashboard");
-                }
-                else if (role == "Teacher")
-                {
-                    TempData["Message"] = "You're already logged in as a teacher.";
-                    return RedirectToPage("/Teacher/TeacherDashboard");
+                    case Role.Student:
+                        TempData["Message"] = "You're already logged in as a student.";
+                        return RedirectToPage("/Student/StudentDashboard");
+
+                    case Role.Teacher:
+                        TempData["Message"] = "You're already logged in as a teacher.";
+                        return RedirectToPage("/Teacher/TeacherDashboard");
                 }
             }
-
             return Page();
         }
 
@@ -56,7 +56,7 @@ namespace PL.Pages.Auth
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, user.RoleName ?? "")
+                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
             var identity = new ClaimsIdentity(claims, "MyCookie");

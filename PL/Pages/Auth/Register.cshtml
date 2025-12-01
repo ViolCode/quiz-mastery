@@ -4,48 +4,68 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-4">
-            <h3 class="text-center mb-4">Register</h3>
-            <form method="post" novalidate>
-                <div class="mb-3">
-                    <label>Name</label>
-                    <input asp-for="RegisterUser.Name" class="form-control" required />
-                    <span asp-validation-for="RegisterUser.Name"></span>
-                </div>
-                <div class="mb-3">
-                    <label>Email</label>
-                    <input asp-for="RegisterUser.Email" class="form-control" required />
-                    <span asp-validation-for="RegisterUser.Email"></span>
-                </div>
-                <div class="mb-3">
-                    <label>Password</label>
-                    <input asp-for="RegisterUser.PasswordHash" type="password" class="form-control" required />
-                    <span asp-validation-for="RegisterUser.PasswordHash"></span>
-                </div>
-                <div class="mb-3">
-                    <label>Confirm Password</label>
-                    <input asp-for="ConfirmPassword" type="password" class="form-control" required />
-                    <span asp-validation-for="ConfirmPassword"></span>
-                </div>
-                <div class="mb-3">
-                    <label>Role</label>
-                    <select asp-for="RegisterUser.RoleId" asp-items="Model.Roles" class="form-control"></select>
-                </div>
-                <button type="submit" class="btn btn-success w-100">Register</button>
-            </form>
-            <p class="mt-3 text-center">
-                <a asp-page="/Auth/Login">Already registered? Login</a>
-            </p>
-            <div asp-validation-summary="All" class="text-danger"></div>
-            @if (TempData["Message"] != null)
-            {
-                <div class="alert alert-warning text-center">
-                    @TempData["Message"]
-                </div>
-            }
+<div class="d-flex flex-column min-vh-100">
+    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+        <div class="w-100 register-form">
+            <div class="text-center mb-4">
+                <h1 class="fw-bold text-foreground">Quiz Mastery</h1>
+                <p class="text-muted">Register to get started</p>
+            </div>
 
+            <form method="post" novalidate class="px-4">
+                <!-- Name -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Name</label>
+                    <input asp-for="RegisterUser.Name" class="form-control form-control-lg rounded-lg" placeholder="Your full name" />
+                    <span asp-validation-for="RegisterUser.Name" class="text-danger small"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input asp-for="RegisterUser.Email" type="email" class="form-control form-control-lg rounded-lg" placeholder="you@school.edu" />
+                    <span asp-validation-for="RegisterUser.Email" class="text-danger small"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Password</label>
+                    <input asp-for="RegisterUser.PasswordHash" type="password" class="form-control form-control-lg rounded-lg" placeholder="••••••••" />
+                    <span asp-validation-for="RegisterUser.PasswordHash" class="text-danger small"></span>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control form-control-lg rounded-lg" placeholder="••••••••" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+
+                <!-- Role -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Role</label>
+                    <select asp-for="RegisterUser.Role" asp-items="Model.Roles" class="form-select form-select-lg rounded-lg"></select>
+                    <span asp-validation-for="RegisterUser.Role" class="text-danger small"></span>
+                </div>
+
+                <!-- Register Button -->
+                <button type="submit" class="btn btn-primary w-100 btn-lg rounded-pill">
+                    Register
+                </button>
+
+                <!-- Login Link -->
+                <p class="mt-4 text-center">
+                    <a asp-page="/Auth/Login" class="fw-semibold text-decoration-none text-primary">Already registered? Login</a>
+                </p>
+
+                <!-- TempData Message -->
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-warning text-center mt-3 rounded-lg">
+                        @TempData["Message"]
+                    </div>
+                }
+            </form>
         </div>
     </div>
 </div>

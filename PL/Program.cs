@@ -21,6 +21,7 @@ builder.Services.AddAuthentication("MyCookie")
     {
         options.LoginPath = "/Auth/Login";  
         options.LogoutPath = "/Auth/Logout"; 
+        options.AccessDeniedPath = "/";
     });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
