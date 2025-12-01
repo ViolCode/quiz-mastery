@@ -10,6 +10,7 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
+    <div id="layout-root" class="d-flex flex-column min-vh-100">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
@@ -31,17 +32,17 @@
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
+    <main role="main" class="flex-grow-1 pb-3">
         <div class="container">
-            &copy; 2025 - Quiz Mastery - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            @RenderBody()
+        </div>
+    </main>
+    <footer class="border-top footer text-muted mt-auto">
+        <div class="container">
+                &copy; 2025 - Quiz Mastery - <a asp-area="" asp-page="/Privacy" class="fw-semibold text-decoration-none text-primary">Privacy</a>
         </div>
     </footer>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

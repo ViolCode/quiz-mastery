@@ -4,61 +4,53 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="d-flex flex-column min-vh-100">
-    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-        <div class="w-100 register-form">
+<div class="auth-page bg-light">
+    <div class="container">
+        <div class="auth-form">
             <div class="text-center mb-4">
                 <h1 class="fw-bold text-foreground">Quiz Mastery</h1>
                 <p class="text-muted">Register to get started</p>
             </div>
 
-            <form method="post" novalidate class="px-4">
-                <!-- Name -->
-                <div class="mb-4">
-                    <label class="form-label fw-semibold">Name</label>
-                    <input asp-for="RegisterUser.Name" class="form-control form-control-lg rounded-lg" placeholder="Your full name" />
+            <form method="post" novalidate>
+                <div class="mb-3">
+                    <label>Name</label>
+                    <input asp-for="RegisterUser.Name" class="form-control" placeholder="Your full name" />
                     <span asp-validation-for="RegisterUser.Name" class="text-danger small"></span>
                 </div>
 
-                <!-- Email -->
-                <div class="mb-4">
-                    <label class="form-label fw-semibold">Email</label>
-                    <input asp-for="RegisterUser.Email" type="email" class="form-control form-control-lg rounded-lg" placeholder="you@school.edu" />
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input asp-for="RegisterUser.Email" type="email" class="form-control" placeholder="you@school.edu" />
                     <span asp-validation-for="RegisterUser.Email" class="text-danger small"></span>
                 </div>
 
-                <!-- Password -->
-                <div class="mb-4">
-                    <label class="form-label fw-semibold">Password</label>
-                    <input asp-for="RegisterUser.PasswordHash" type="password" class="form-control form-control-lg rounded-lg" placeholder="••••••••" />
+                <div class="mb-3">
+                    <label>Password</label>
+                    <input asp-for="RegisterUser.PasswordHash" type="password" class="form-control" />
                     <span asp-validation-for="RegisterUser.PasswordHash" class="text-danger small"></span>
                 </div>
 
-                <!-- Confirm Password -->
-                <div class="mb-4">
-                    <label class="form-label fw-semibold">Confirm Password</label>
-                    <input asp-for="ConfirmPassword" type="password" class="form-control form-control-lg rounded-lg" placeholder="••••••••" />
+                <div class="mb-3">
+                    <label>Confirm Password</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" />
                     <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                 </div>
 
-                <!-- Role -->
-                <div class="mb-4">
-                    <label class="form-label fw-semibold">Role</label>
-                    <select asp-for="RegisterUser.Role" asp-items="Model.Roles" class="form-select form-select-lg rounded-lg"></select>
+                <div class="mb-3">
+                    <label>Role</label>
+                    <select asp-for="RegisterUser.Role" asp-items="Model.Roles" class="form-select"></select>
                     <span asp-validation-for="RegisterUser.Role" class="text-danger small"></span>
                 </div>
 
-                <!-- Register Button -->
-                <button type="submit" class="btn btn-primary w-100 btn-lg rounded-pill">
+                <button type="submit" class="btn btn-primary w-100">
                     Register
                 </button>
 
-                <!-- Login Link -->
                 <p class="mt-4 text-center">
                     <a asp-page="/Auth/Login" class="fw-semibold text-decoration-none text-primary">Already registered? Login</a>
                 </p>
 
-                <!-- TempData Message -->
                 @if (TempData["Message"] != null)
                 {
                     <div class="alert alert-warning text-center mt-3 rounded-lg">

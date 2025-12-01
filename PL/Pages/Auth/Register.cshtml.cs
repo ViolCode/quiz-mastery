@@ -2,7 +2,6 @@ using BLL.Helpers;
 using Contracts.DTOs;
 using Contracts.Enums;
 using Contracts.Interfaces;
-using DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
