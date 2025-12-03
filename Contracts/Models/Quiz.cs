@@ -16,5 +16,4 @@ namespace DAL.Models
         public ICollection<Question> Questions { get; set; }
         public ICollection<TeacherAssignment> TeacherAssignments { get; set; }
     }
-
 }

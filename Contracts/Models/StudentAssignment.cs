@@ -17,5 +17,4 @@ namespace DAL.Models
         public TeacherAssignment Assignment { get; set; }
         public ICollection<Answer> Answers { get; set; }
     }
-
 }

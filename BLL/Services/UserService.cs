@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace BLL.Services
 {
-    public class UserService : IUserService
+    public class UserService : IUserService //implements
     {
-        private readonly IUserAccess _userAccess;
+        private readonly IUserAccess _userAccess; //uses
 
         public UserService(IUserAccess userAccess)
         {
