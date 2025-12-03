@@ -23,15 +23,15 @@ namespace PL.Pages.Auth
         {
             var roleClaim = User.FindFirstValue(ClaimTypes.Role);
 
-            if (!string.IsNullOrEmpty(roleClaim) && Enum.TryParse<Role>(roleClaim, out var role))
+            if (!string.IsNullOrEmpty(roleClaim))
             {
-                switch (role)
+                switch (roleClaim)
                 {
-                    case Role.Student:
+                    case "Student":
                         TempData["Message"] = "You're already logged in as a student.";
                         return RedirectToPage("/Student/StudentDashboard");
 
-                    case Role.Teacher:
+                    case "Teacher":
                         TempData["Message"] = "You're already logged in as a teacher.";
                         return RedirectToPage("/Teacher/TeacherDashboard");
                 }
@@ -56,7 +56,7 @@ namespace PL.Pages.Auth
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
+                new Claim(ClaimTypes.Role, user.RoleName) 
             };
 
             var identity = new ClaimsIdentity(claims, "MyCookie");

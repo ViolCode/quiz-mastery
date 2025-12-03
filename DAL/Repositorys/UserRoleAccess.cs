@@ -1,15 +1,16 @@
 ﻿using Contracts.Interfaces;
-using DAL.Models;
+using Contracts.Models;
+using Microsoft.Data.SqlClient;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace DAL.Repositorys
 {
-    public class UserRole : IUserRole
+    public class UserRoleAccess : IUserRole
     {
         private readonly string _connectionString;
 
-        public UserRole(string connectionString)
+        public UserRoleAccess(string connectionString)
         {
             _connectionString = connectionString;
         }

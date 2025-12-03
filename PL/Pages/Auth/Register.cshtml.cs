@@ -30,26 +30,23 @@ namespace PL.Pages.Auth
         public IActionResult OnGet()
         {
             var roles = _userService.GetAllRoles();
-            Roles = Enum.GetValues(typeof(Role))
-                .Cast<Role>()
-                .Select(r => new SelectListItem
-                {
-                    Value = ((int)r).ToString(),
-                    Text = r.ToString()
-                })
-                .ToList();
+            Roles = roles.Select(r => new SelectListItem
+            {
+                Value = r.Id.ToString(),
+                Text = r.Name
+            }).ToList();
 
             var roleClaim = User.FindFirstValue(ClaimTypes.Role);
 
-            if (!string.IsNullOrEmpty(roleClaim) && Enum.TryParse<Role>(roleClaim, out var role))
+            if (!string.IsNullOrEmpty(roleClaim))
             {
-                switch (role)
+                switch (roleClaim)
                 {
-                    case Role.Student:
+                    case "Student":
                         TempData["Message"] = "You're already logged in as a student.";
                         return RedirectToPage("/Student/StudentDashboard");
 
-                    case Role.Teacher:
+                    case "Teacher":
                         TempData["Message"] = "You're already logged in as a teacher.";
                         return RedirectToPage("/Teacher/TeacherDashboard");
                 }

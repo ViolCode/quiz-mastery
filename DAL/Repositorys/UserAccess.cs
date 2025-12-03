@@ -14,12 +14,12 @@ namespace DAL.Repositorys
     public class UserAccess : IUserAccess
     {
         private readonly string _connectionString;
-        private readonly IRoleMapper _roleMapper;
+        private readonly IUserRole _roleRepo;
 
-        public UserAccess(string connectionString, IRoleMapper roleMapper)
+        public UserAccess(string connectionString, IUserRole roleRepo)
         {
             _connectionString = connectionString;
-            _roleMapper = roleMapper;
+            _roleRepo = roleRepo;
         }
 
         public UserDto? GetUserByEmail(string email)
@@ -30,7 +30,7 @@ namespace DAL.Repositorys
                 SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id, r.Name AS RoleName
                 FROM [User] u
                 JOIN [User_Role] r ON u.Role_Id = r.Id
-                WHERE u.Email=@Email", conn);
+                WHERE u.Email = @Email", conn);
 
             cmd.Parameters.AddWithValue("@Email", email);
 
@@ -43,7 +43,8 @@ namespace DAL.Repositorys
                     Name = reader.GetString(1),
                     Email = reader.GetString(2),
                     PasswordHash = reader.GetString(3),
-                    Role = _roleMapper.FromId(reader.GetInt32(4))
+                    RoleId = reader.GetInt32(4),
+                    RoleName = reader.GetString(5)
                 };
             }
             return null;
@@ -54,11 +55,13 @@ namespace DAL.Repositorys
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
             var cmd = new SqlCommand(
-                "INSERT INTO [User] (Name, Email, Password_Hash, Role_Id) VALUES (@Name, @Email, @PasswordHash, @Role)", conn);
+                "INSERT INTO [User] (Name, Email, Password_Hash, Role_Id) VALUES (@Name, @Email, @PasswordHash, @RoleId)", conn);
+
             cmd.Parameters.AddWithValue("@Name", user.Name);
             cmd.Parameters.AddWithValue("@Email", user.Email);
             cmd.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@Role", _roleMapper.ToId(user.Role));
+            cmd.Parameters.AddWithValue("@RoleId", user.RoleId);
+
             cmd.ExecuteNonQuery();
         }
 
@@ -67,12 +70,14 @@ namespace DAL.Repositorys
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
             var cmd = new SqlCommand(
-                "UPDATE [User] SET Name=@Name, Email=@Email, Password_Hash=@PasswordHash, Role=@Role WHERE Id=@Id", conn);
+                "UPDATE [User] SET Name = @Name, Email = @Email, Password_Hash = @PasswordHash, Role_Id = @RoleId WHERE Id = @Id", conn);
+
             cmd.Parameters.AddWithValue("@Id", user.Id);
             cmd.Parameters.AddWithValue("@Name", user.Name);
             cmd.Parameters.AddWithValue("@Email", user.Email);
-            cmd.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@Role", _roleMapper.ToId(user.Role));
+            cmd.Parameters.AddWithValue("@PasswordHash", user.PasswordHash ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@RoleId", user.RoleId);
+
             cmd.ExecuteNonQuery();
         }
 
@@ -80,7 +85,7 @@ namespace DAL.Repositorys
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
-            var cmd = new SqlCommand("DELETE FROM [User] WHERE Id=@Id", conn);
+            var cmd = new SqlCommand("DELETE FROM [User] WHERE Id = @Id", conn);
             cmd.Parameters.AddWithValue("@Id", id);
             cmd.ExecuteNonQuery();
         }
@@ -95,7 +100,7 @@ namespace DAL.Repositorys
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                roles.Add(((int)reader["id"], reader["name"].ToString()!));
+                roles.Add((reader.GetInt32(0), reader.GetString(1)));
             }
             return roles;
         }
@@ -108,8 +113,8 @@ namespace DAL.Repositorys
             var cmd = new SqlCommand(@"
                 SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id, r.Name AS RoleName
                 FROM [User] u
-                JOIN [User_Role] r ON u.Role_Id = r.Id
-                WHERE u.Email=@Email", conn);
+                JOIN [User_Role] r ON u.Role_Id = r.Id", conn); 
+
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
@@ -118,8 +123,9 @@ namespace DAL.Repositorys
                     Id = reader.GetInt32(0),
                     Name = reader.GetString(1),
                     Email = reader.GetString(2),
-                    PasswordHash = reader.GetString(3),
-                    Role = _roleMapper.FromId(reader.GetInt32(4))
+                    PasswordHash = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                    RoleId = reader.GetInt32(4),
+                    RoleName = reader.GetString(5)
                 });
             }
             return users;

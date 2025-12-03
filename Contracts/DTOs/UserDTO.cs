@@ -18,7 +18,7 @@ namespace Contracts.DTOs
         [Required]
         public string PasswordHash { get; set; }
         [Required]
-        public Role Role { get; set; }
-        public string RoleName => Role.ToString();
+        public int RoleId { get; set; }
+        public string RoleName { get; set; } = "";
     }
 }

@@ -1,4 +1,4 @@
-﻿using DAL.Models;
+﻿using Contracts.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Contracts.Interfaces
 {
-    public interface IUserRoleRepository
+    public interface IUserRole
     {
         List<UserRole> GetAllRoles();
         UserRole? GetRoleById(int id);

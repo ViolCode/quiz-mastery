@@ -1,6 +1,7 @@
 ﻿using BLL.Helpers;
 using Contracts.DTOs;
 using Contracts.Interfaces;
+using Contracts.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +13,21 @@ namespace BLL.Services
     public class UserService : IUserService //implements
     {
         private readonly IUserAccess _userAccess; //uses
+        private readonly IUserRole _roleRepo;
 
-        public UserService(IUserAccess userAccess)
+        public UserService(IUserAccess userAccess, IUserRole roleRepo)
         {
             _userAccess = userAccess;
+            _roleRepo = roleRepo;
         }
+
+        public List<UserRole> GetAvailableRoles() => _roleRepo.GetAllRoles();
 
         public void Register(UserDto user)
         {
+            var role = _roleRepo.GetRoleById(user.RoleId);
+            if (role == null) throw new Exception("Invalid role");
+
             user.PasswordHash = PasswordHasher.Hash(user.PasswordHash);
             _userAccess.CreateUser(user);
         }
