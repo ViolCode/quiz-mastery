@@ -1,5 +1,4 @@
 using Contracts.DTOs;
-using Contracts.Enums;
 using Contracts.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +8,7 @@ using System.Security.Claims;
 
 namespace PL.Pages.Student
 {
-    [Authorize(Roles = nameof(Role.Student))]
+    [Authorize(Roles = "Student")]
     public class StudentDashboardModel : PageModel
     {
         private readonly IUserAccess _userAccess;
