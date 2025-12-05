@@ -94,5 +94,4 @@ namespace BLL.Tests
             result!.Email.Should().Be("test@example.com");
         }
     }
-
 }

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DAL.Mappers
+namespace Contracts.Mappers
 {
     public class RoleMapper : IRoleMapper
     {
@@ -24,5 +24,4 @@ namespace DAL.Mappers
             _ => throw new InvalidOperationException("Unknown role")
         };
     }
-
 }

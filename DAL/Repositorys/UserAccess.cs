@@ -1,7 +1,7 @@
 ﻿using Contracts.DTOs;
 using Contracts.Enums;
 using Contracts.Interfaces;
-using DAL.Mappers;
+using Contracts.Mappers;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;

@@ -12,10 +12,8 @@ namespace DAL.Models
         public string StudentId { get; set; }
         public int AssignmentId { get; set; }
         public DateTime AssignedAt { get; set; }
-
         public User Student { get; set; }
         public TeacherAssignment Assignment { get; set; }
         public ICollection<Answer> Answers { get; set; }
     }
-
 }

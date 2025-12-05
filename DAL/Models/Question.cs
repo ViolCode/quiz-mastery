@@ -13,10 +13,8 @@ namespace DAL.Models
         public string Text { get; set; }
         public string QuestionType { get; set; } // SingleChoice, MultipleChoice
         public int CorrectAnswerId { get; set; }
-
         public Quiz Quiz { get; set; }
         public Answer CorrectAnswer { get; set; }
         public ICollection<Answer> Answers { get; set; }
     }
-
 }

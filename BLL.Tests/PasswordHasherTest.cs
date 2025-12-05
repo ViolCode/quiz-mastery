@@ -13,7 +13,7 @@ namespace BLL.Tests
         [Fact]
         public void Hash_ShouldThrow_WhenPasswordIsEmpty()
         {
-            Action act = () => PasswordHasher.Hash("");
+            Action act = () => PasswordHasher.Hash("abc");
             act.Should().Throw<Exception>().WithMessage("Password is null or empty");
         }
 
@@ -25,5 +25,4 @@ namespace BLL.Tests
             PasswordHasher.Verify(pwd, hash).Should().BeTrue();
         }
     }
-
 }

@@ -1,6 +1,6 @@
 using BLL.Services;
 using Contracts.Interfaces;
-using DAL.Mappers;
+using Contracts.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
