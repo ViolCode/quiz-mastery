@@ -1,4 +1,5 @@
 ﻿using Contracts.Enums;
+using Contracts.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace DAL.Mappers
 {
-    public static class RoleMapper
+    public class RoleMapper : IRoleMapper
     {
-        public static Role FromId(int id) => id switch
+        public Role FromId(int id) => id switch
         {
             1 => Role.Student,
             2 => Role.Teacher,
             _ => throw new InvalidOperationException("Unknown role")
         };
 
-        public static int ToId(Role role) => role switch
+        public int ToId(Role role) => role switch
         {
             Role.Student => 1,
             Role.Teacher => 2,

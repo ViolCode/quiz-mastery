@@ -9,15 +9,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DAL
+namespace DAL.Repositorys
 {
     public class UserAccess : IUserAccess
     {
         private readonly string _connectionString;
+        private readonly IRoleMapper _roleMapper;
 
-        public UserAccess(string connectionString)
+        public UserAccess(string connectionString, IRoleMapper roleMapper)
         {
             _connectionString = connectionString;
+            _roleMapper = roleMapper;
         }
 
         public UserDto? GetUserByEmail(string email)
@@ -41,7 +43,7 @@ namespace DAL
                     Name = reader.GetString(1),
                     Email = reader.GetString(2),
                     PasswordHash = reader.GetString(3),
-                    Role = RoleMapper.FromId(reader.GetInt32(4))
+                    Role = _roleMapper.FromId(reader.GetInt32(4))
                 };
             }
             return null;
@@ -56,8 +58,7 @@ namespace DAL
             cmd.Parameters.AddWithValue("@Name", user.Name);
             cmd.Parameters.AddWithValue("@Email", user.Email);
             cmd.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@Role", RoleMapper.ToId(user.Role));
-            cmd.ExecuteNonQuery();
+            cmd.Parameters.AddWithValue("@Role", _roleMapper.ToId(user.Role)); cmd.ExecuteNonQuery();
         }
 
         public void UpdateUser(UserDto user)
@@ -70,8 +71,7 @@ namespace DAL
             cmd.Parameters.AddWithValue("@Name", user.Name);
             cmd.Parameters.AddWithValue("@Email", user.Email);
             cmd.Parameters.AddWithValue("@PasswordHash", user.PasswordHash);
-            cmd.Parameters.AddWithValue("@Role", RoleMapper.ToId(user.Role));
-            cmd.ExecuteNonQuery();
+            cmd.Parameters.AddWithValue("@Role", _roleMapper.ToId(user.Role)); cmd.ExecuteNonQuery();
         }
 
         public void DeleteUser(int id)
@@ -117,7 +117,7 @@ namespace DAL
                     Name = reader.GetString(1),
                     Email = reader.GetString(2),
                     PasswordHash = reader.GetString(3),
-                    Role = RoleMapper.FromId(reader.GetInt32(4))
+                    Role = _roleMapper.FromId(reader.GetInt32(4))
                 });
             }
             return users;
