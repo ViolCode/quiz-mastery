@@ -41,7 +41,22 @@ namespace PL.Pages.Auth
 
         public async Task<IActionResult> OnPost()
         {
-            if (!ModelState.IsValid)
+            ModelState.Clear(); // align with register: custom friendly messages
+            var hasError = false;
+
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                ModelState.AddModelError(nameof(Email), "Email is required.");
+                hasError = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                ModelState.AddModelError(nameof(Password), "Password is required.");
+                hasError = true;
+            }
+
+            if (hasError || !ModelState.IsValid)
             {
                 return Page();
             }

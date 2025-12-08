@@ -13,4 +13,3 @@ namespace Contracts.Interfaces
         int ToId(Role role);
     }
 }
-

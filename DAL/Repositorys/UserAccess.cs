@@ -66,7 +66,7 @@ namespace DAL.Repositorys
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
             var cmd = new SqlCommand(
-                "UPDATE [User] SET Name=@Name, Email=@Email, Password_Hash=@PasswordHash, Role=@Role WHERE Id=@Id", conn);
+                "UPDATE [User] SET Name=@Name, Email=@Email, Password_Hash=@PasswordHash, Role_Id=@Role WHERE Id=@Id", conn);
             cmd.Parameters.AddWithValue("@Id", user.Id);
             cmd.Parameters.AddWithValue("@Name", user.Name);
             cmd.Parameters.AddWithValue("@Email", user.Email);
