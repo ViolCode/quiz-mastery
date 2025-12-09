@@ -63,33 +63,14 @@ namespace PL.Pages.Auth
 
         public IActionResult OnPost()
         {
-            LoadRoles();
-            ModelState.Clear(); // remove default messages so we can provide friendly ones
-
-            var hasError = false;
-
-            if (string.IsNullOrWhiteSpace(RegisterUser.Name))
-            {
-                ModelState.AddModelError("RegisterUser.Name", "Name is required.");
-                hasError = true;
-            }
-
-            if (string.IsNullOrWhiteSpace(RegisterUser.Email))
-            {
-                ModelState.AddModelError("RegisterUser.Email", "Email is required.");
-                hasError = true;
-            }
-
-            if (string.IsNullOrWhiteSpace(RegisterUser.PasswordHash))
-            {
-                ModelState.AddModelError("RegisterUser.PasswordHash", "Password is required.");
-                hasError = true;
+            if (!ModelState.IsValid) 
+            { 
+                return Page(); 
             }
 
             if (string.IsNullOrWhiteSpace(ConfirmPassword))
             {
                 ModelState.AddModelError("ConfirmPassword", "Please confirm your password.");
-                hasError = true;
             }
 
             if (!string.IsNullOrWhiteSpace(RegisterUser.PasswordHash) &&
@@ -97,7 +78,7 @@ namespace PL.Pages.Auth
                 RegisterUser.PasswordHash != ConfirmPassword)
             {
                 ModelState.AddModelError("ConfirmPassword", "Passwords do not match.");
-                hasError = true;
+                return Page();
             }
 
             if (!string.IsNullOrWhiteSpace(RegisterUser.PasswordHash) &&
@@ -105,18 +86,13 @@ namespace PL.Pages.Auth
             {
                 ModelState.AddModelError("RegisterUser.PasswordHash",
                     "Password must be at least 8 characters, include 1 uppercase, 1 number, and contain only letters/numbers.");
-                hasError = true;
+                return Page();
             }
 
             if (!string.IsNullOrWhiteSpace(RegisterUser.Email) &&
                 !Regex.IsMatch(RegisterUser.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
                 ModelState.AddModelError("RegisterUser.Email", "Please enter a valid email address.");
-                hasError = true;
-            }
-
-            if (hasError)
-            {
                 return Page();
             }
 

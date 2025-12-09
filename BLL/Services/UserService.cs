@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace BLL.Services
 {
-    public class UserService : IUserService //implements
+    public class UserService : IUserService
     {
-        private readonly IUserAccess _userAccess; //uses
+        private readonly IUserAccess _userAccess;
 
         public UserService(IUserAccess userAccess)
         {
@@ -55,11 +55,6 @@ namespace BLL.Services
         public List<(int Id, string Name)> GetAllRoles()
         {
             return _userAccess.GetAllRoles();
-        }
-
-        public UserDto? FindByEmail(string email)
-        {
-            return _userAccess.GetUserByEmail(email);
         }
     }
 }

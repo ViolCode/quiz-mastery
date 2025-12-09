@@ -21,5 +21,4 @@ namespace BLL.Tests
             PasswordValidator.IsValidPassword(password).Should().Be(expected);
         }
     }
-
 }
