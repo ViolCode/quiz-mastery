@@ -20,6 +20,12 @@ namespace BLL.Services
 
         public void Register(UserDto user)
         {
+            var existing = _userAccess.GetUserByEmail(user.Email);
+            if (existing != null)
+            {
+                throw new InvalidOperationException("An account with this email already exists.");
+            }
+
             user.PasswordHash = PasswordHasher.Hash(user.PasswordHash);
             _userAccess.CreateUser(user);
         }

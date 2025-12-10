@@ -27,9 +27,8 @@ namespace PL.Pages.Auth
 
         public List<SelectListItem> Roles { get; set; } = new();
 
-        public IActionResult OnGet()
+        private void LoadRoles()
         {
-            var roles = _userService.GetAllRoles();
             Roles = Enum.GetValues(typeof(Role))
                 .Cast<Role>()
                 .Select(r => new SelectListItem
@@ -38,6 +37,11 @@ namespace PL.Pages.Auth
                     Text = r.ToString()
                 })
                 .ToList();
+        }
+
+        public IActionResult OnGet()
+        {
+            LoadRoles();
 
             var roleClaim = User.FindFirstValue(ClaimTypes.Role);
 
@@ -64,26 +68,48 @@ namespace PL.Pages.Auth
                 return Page(); 
             }
 
-            if (RegisterUser.PasswordHash != ConfirmPassword)
+            if (string.IsNullOrWhiteSpace(ConfirmPassword))
+            {
+                ModelState.AddModelError("ConfirmPassword", "Please confirm your password.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(RegisterUser.PasswordHash) &&
+                !string.IsNullOrWhiteSpace(ConfirmPassword) &&
+                RegisterUser.PasswordHash != ConfirmPassword)
             {
                 ModelState.AddModelError("ConfirmPassword", "Passwords do not match.");
                 return Page();
             }
 
-            if (!PasswordValidator.IsValidPassword(RegisterUser.PasswordHash))
+            if (!string.IsNullOrWhiteSpace(RegisterUser.PasswordHash) &&
+                !PasswordValidator.IsValidPassword(RegisterUser.PasswordHash))
             {
-                ModelState.AddModelError("User.PasswordHash",
+                ModelState.AddModelError("RegisterUser.PasswordHash",
                     "Password must be at least 8 characters, include 1 uppercase, 1 number, and contain only letters/numbers.");
                 return Page();
             }
 
-            if (!Regex.IsMatch(RegisterUser.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            if (!string.IsNullOrWhiteSpace(RegisterUser.Email) &&
+                !Regex.IsMatch(RegisterUser.Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
-                ModelState.AddModelError("User.Email", "Please enter a valid email address.");
+                ModelState.AddModelError("RegisterUser.Email", "Please enter a valid email address.");
                 return Page();
             }
 
-            _userService.Register(RegisterUser);
+            try
+            {
+                _userService.Register(RegisterUser);
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("RegisterUser.Email", ex.Message);
+                return Page();
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError(string.Empty, "Unable to register right now. Please try again.");
+                return Page();
+            }
             return RedirectToPage("/Auth/Login");
         }
     }

@@ -12,4 +12,3 @@ namespace Contracts.Enums
         Teacher
     }
 }
-

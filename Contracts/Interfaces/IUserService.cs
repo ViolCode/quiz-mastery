@@ -14,5 +14,6 @@ namespace Contracts.Interfaces
         void DeleteAccount(int id);
         UserDto? Login(string email, string password);
         List<(int Id, string Name)> GetAllRoles();
+        //UserDto? FindByEmail(string email);
     }
 }

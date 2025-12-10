@@ -1,5 +1,6 @@
 using BLL.Services;
 using Contracts.Interfaces;
+using Contracts.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +27,9 @@ builder.Services.AddAuthentication("MyCookie")
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddScoped<IUserAccess>(sp => new DAL.UserAccess(connectionString));
+builder.Services.AddScoped<IRoleMapper, RoleMapper>();
+builder.Services.AddScoped<IUserAccess>(sp =>
+    new DAL.Repositorys.UserAccess(connectionString, sp.GetRequiredService<IRoleMapper>()));
 builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();

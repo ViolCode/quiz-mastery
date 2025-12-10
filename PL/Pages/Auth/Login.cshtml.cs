@@ -41,6 +41,18 @@ namespace PL.Pages.Auth
 
         public async Task<IActionResult> OnPost()
         {
+            ModelState.Clear(); 
+
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                ModelState.AddModelError(nameof(Email), "Email is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                ModelState.AddModelError(nameof(Password), "Password is required.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();

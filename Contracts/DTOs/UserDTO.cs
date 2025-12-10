@@ -11,13 +11,18 @@ namespace Contracts.DTOs
     public class UserDto
     {
         public int Id { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Name is required.")]
         public string Name { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Email is required.")]
+        [Display(Name = "Email")]
         public string Email { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Password is required.")]
+        [Display(Name = "Password")]
         public string PasswordHash { get; set; }
-        [Required]
+
+        [Required(ErrorMessage = "Role is required.")]
         public Role Role { get; set; }
         public string RoleName => Role.ToString();
     }

@@ -13,9 +13,7 @@ namespace DAL.Models
         public string Text { get; set; }
         public bool IsCorrect { get; set; }
         public int? StudentAssignmentId { get; set; }
-
         public Question Question { get; set; }
         public StudentAssignment StudentAssignment { get; set; }
     }
-
 }

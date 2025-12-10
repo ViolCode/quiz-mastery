@@ -12,9 +12,7 @@ namespace DAL.Models
         public string Title { get; set; }
         public string Visibility { get; set; } // Public, Private, Link
         public DateTime CreatedAt { get; set; }
-
         public ICollection<Question> Questions { get; set; }
         public ICollection<TeacherAssignment> TeacherAssignments { get; set; }
     }
-
 }
