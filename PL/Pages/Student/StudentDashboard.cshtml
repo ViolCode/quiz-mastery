@@ -11,17 +11,23 @@
 </head>
 <body class="bg-light">
     <div class="container mt-5 text-center">
-        <h1>@ViewData["Title"]</h1>
-        <h3>Welcome @Model.CurrentUser.Name (@Model.CurrentUser.Email, @Model.CurrentUser.RoleName)</h3>
-        <form method="post" asp-page-handler="Logout">
-            <button type="submit" class="btn btn-danger">Logout</button>
-        </form>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Student Dashboard</h2>
+                <p class="text-muted mb-0">Welcome @Model.CurrentUser.Name (@Model.CurrentUser.Email, @Model.CurrentUser.RoleName)</p>
+            </div>
+            <div class="d-flex gap-2">
+                <form method="post" asp-page-handler="Logout">
+                    <button type="submit" class="btn btn-outline-danger">Logout</button>
+                </form>
+            </div>
+        </div>
+
         @if (TempData["Message"] != null)
         {
             <div class="alert alert-warning text-center">
                 @TempData["Message"]
             </div>
         }
-
     </div>
 </body>
