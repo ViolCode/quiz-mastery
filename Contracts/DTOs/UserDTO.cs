@@ -15,11 +15,9 @@ namespace Contracts.DTOs
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
-        [Display(Name = "Email")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Password is required.")]
-        [Display(Name = "Password")]
         public string PasswordHash { get; set; }
 
         [Required(ErrorMessage = "Role is required.")]
