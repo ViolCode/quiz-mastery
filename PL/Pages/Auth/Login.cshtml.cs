@@ -95,21 +95,7 @@ namespace PL.Pages.Auth
             var identity = new ClaimsIdentity(claims, "MyCookie");
             var principal = new ClaimsPrincipal(identity);
 
-            var authProperties = new AuthenticationProperties
-            {
-                IsPersistent = RememberMe
-            };
-
-            if (RememberMe)
-            {
-                authProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14);
-            }
-
-            await HttpContext.SignInAsync(
-                "MyCookie",
-                principal,
-                authProperties);
-
+            await HttpContext.SignInAsync("MyCookie", principal);
             if (user.RoleName == "Teacher")
                 return RedirectToPage("/Teacher/TeacherDashboard");
             else if (user.RoleName == "Student")
@@ -119,24 +105,3 @@ namespace PL.Pages.Auth
         }
     }
 }
-//builder.Services.AddAuthentication("MyCookie")
-//    .AddCookie("MyCookie", options =>
-//    {
-//        options.LoginPath = "/Auth/Login";
-//        options.LogoutPath = "/Auth/Logout";
-//        options.AccessDeniedPath = "/";
-//        options.ExpireTimeSpan = TimeSpan.FromDays(14);
-//        options.SlidingExpiration = true;
-//        options.Cookie.IsEssential = true;
-//        options.Events.OnValidatePrincipal = context =>
-//        {
-//            if (!context.Properties.IsPersistent &&
-//                context.Properties.ExpiresUtc == null)
-//            {
-//                // Session cookie – do nothing
-//            }
-
-//            return Task.CompletedTask;
-//        };
-
-//    });
