@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quiz Mastery</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+
+<body>
+    <div class="app-shell">
+
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <h5>Quiz Mastery</h5>
+                <small>Teacher Portal</small>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a asp-page="/Teacher/TeacherDashboard" class="sidebar-link">Dashboard</a>
+                <a asp-page="/Teacher/CreateQuiz" class="sidebar-link">Create Quiz</a>
+                <a asp-page="/Teacher/MyQuizzes" class="sidebar-link">My Quizzes</a>
+                <a asp-page="/Teacher/People" class="sidebar-link">People</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-box">
+                    <div class="avatar">T</div>
+                    <div>
+                        <div class="user-name">@User.Identity?.Name</div>
+                        <div class="user-role">Teacher</div>
+                    </div>
+                </div>
+
+                <form method="post" asp-page="/Auth/Logout">
+                    <button type="submit" class="btn btn-outline-secondary w-100">
+                        Sign Out
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="content-surface">
+                @RenderBody()
+            </div>
+        </main>
+
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
