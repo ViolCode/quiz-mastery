@@ -1,6 +1,7 @@
 ﻿@page
 @model PL.Pages.Auth.RegisterModel
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Register";
 }
 
@@ -9,7 +10,7 @@
         <div class="auth-form">
             <div class="text-center mb-4">
                 <h1 class="fw-bold text-foreground">Quiz Mastery</h1>
-                <p class="text-muted">Register to get started</p>
+                <h5 class="text-muted">Register</h5>
             </div>
 
             <div asp-validation-summary="ModelOnly" class="text-danger small" style="list-style:none;"></div>
@@ -29,13 +30,13 @@
 
                 <div class="mb-3">
                     <label>Password</label>
-                    <input asp-for="RegisterUser.PasswordHash" type="password" class="form-control" />
+                    <input asp-for="RegisterUser.PasswordHash" type="password" class="form-control" placeholder="Your password" />
                     <span asp-validation-for="RegisterUser.PasswordHash" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
                     <label>Confirm Password</label>
-                    <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Repeat your password" />
                     <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                 </div>
 

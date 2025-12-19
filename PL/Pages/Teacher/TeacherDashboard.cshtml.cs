@@ -30,11 +30,5 @@ namespace PL.Pages.Teacher
             CurrentUser = _userAccess.GetUserByEmail(email);
             return Page();
         }
-
-        public async Task<IActionResult> OnPostLogout()
-        {
-            await HttpContext.SignOutAsync("MyCookie");
-            return RedirectToPage("/Auth/Login");
-        }
     }
 }
