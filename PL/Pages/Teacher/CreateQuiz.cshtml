@@ -3,149 +3,562 @@
 @{
     Layout = "_TeacherLayout";
     ViewData["Title"] = "Create Quiz";
+    ViewData["NoContentSurface"] = true;
 }
 
-<!-- Sticky Top Bar -->
-<div class="sticky-top bg-white border-bottom shadow-sm">
-    <div class="container-fluid px-4 py-3 d-flex justify-content-between align-items-center">
-        <div>
-            <h1 class="h4 fw-bold mb-0">Create Quiz</h1>
-            <small class="text-muted">Build and manage your quiz</small>
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-eye me-1"></i> Preview
-            </button>
-            <button type="submit" form="quiz-form" class="btn btn-primary btn-sm">
-                <i class="bi bi-send me-1"></i> Publish
-            </button>
-        </div>
-    </div>
-</div>
+<style>
+    .create-quiz-page {
+        background-color: #f5f4f8;
+        min-height: 100vh;
+        padding: 0;
+    }
+    
+    .quiz-header {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .quiz-content {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .question-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+    }
+    
+    .question-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border-color: #6366f1;
+    }
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f3f4f6;
+    }
+    
+    .question-number {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .required-badge {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .option-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .option-row .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    
+    .option-row .form-control {
+        flex: 1;
+    }
+    
+    .sidebar-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .privacy-option {
+        width: 100%;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        background: white;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    
+    .privacy-option:hover {
+        border-color: #6366f1;
+        background: #f5f3ff;
+    }
+    
+    .privacy-option.active {
+        background: #6366f1;
+        border-color: #6366f1;
+        color: white;
+    }
+    
+    .required-field {
+        color: #dc2626;
+        font-weight: 600;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Override content padding for this page */
+    .content:has(.create-quiz-page) {
+        padding: 0 !important;
+    }
+</style>
 
-<div class="container-fluid px-4 py-4">
-    <div class="row g-4">
-
-        <!-- Main Content -->
-        <div class="col-lg-8">
-
-            <form method="post" id="quiz-form" class="d-grid gap-4">
-
-                <!-- Quiz Title -->
-                <div class="card border-2 shadow-sm">
-                    <div class="card-body">
-                        <label class="form-label fw-semibold">
-                            Quiz Title <span class="text-danger">*</span>
-                        </label>
-                        <input asp-for="QuizTitle"
-                               class="form-control form-control-lg"
-                               placeholder="Enter your quiz title..." />
-                        <span asp-validation-for="QuizTitle" class="text-danger small"></span>
-                    </div>
-                </div>
-
-                <!-- Question Card -->
-                <div class="card border-2 shadow-sm">
-                    <div class="card-body">
-
-                        <div class="d-flex align-items-center mb-3">
-                            <span class="badge bg-secondary me-2">Q1</span>
-                            <div class="ms-auto text-muted small">
-                                Required
-                            </div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Make function globally accessible
+        window.addQuestion = function() {
+            const questionsContainer = document.getElementById('questions-container');
+            if (!questionsContainer) {
+                console.error('Questions container not found');
+                return;
+            }
+            
+            const questionIndex = questionsContainer.querySelectorAll('.question-card').length;
+            const questionHtml = `
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="question-number">Question ${questionIndex + 1}</span>
+                            <span class="required-badge">Required</span>
                         </div>
+                        ${questionIndex > 0 ? `<button type="button" class="btn btn-sm btn-outline-danger remove-question" onclick="removeQuestion(this)">
+                            <i class="bi bi-trash me-1"></i> Remove
+                        </button>` : ''}
+                    </div>
 
-                        <label class="form-label fw-semibold">
-                            Question Text <span class="text-danger">*</span>
+                    <div class="mb-4">
+                        <label class="form-label">
+                            Question Text <span class="required-field">*</span>
                         </label>
-                        <textarea asp-for="QuestionText"
-                                  class="form-control"
+                        <textarea name="Questions[${questionIndex}].QuestionText"
+                                  class="form-control question-text"
                                   rows="4"
-                                  placeholder="Enter your question..."></textarea>
-                        <span asp-validation-for="QuestionText" class="text-danger small"></span>
+                                  placeholder="Enter your question here..."></textarea>
+                        <span class="text-danger small validation-message d-block mt-1" data-valmsg-for="Questions[${questionIndex}].QuestionText"></span>
+                    </div>
 
-                        <!-- Options -->
-                        <div class="mt-4">
-                            <label class="form-label fw-semibold">
-                                Options <span class="text-danger">*</span>
-                            </label>
-
-                            @for (int i = 0; i < Model.Options.Count; i++)
-                            {
-                                <div class="d-flex align-items-center gap-2 mb-2">
+                    <div>
+                        <label class="form-label mb-3">
+                            Answer Options <span class="required-field">*</span>
+                            <small class="text-muted d-block mt-1">Click the radio button to mark the correct answer</small>
+                        </label>
+                        <div class="options-container">
+                            ${[0, 1, 2, 3].map(i => `
+                                <div class="option-row d-flex align-items-center gap-2 mb-2">
                                     <input type="radio"
-                                           class="form-check-input"
-                                           name="CorrectOptionIndex"
-                                           value="@i"
-                                           @(Model.CorrectOptionIndex == i ? "checked" : "") />
-
-                                    <input class="form-control"
-                                           name="Options[@i]"
-                                           value="@Model.Options[i]"
-                                           placeholder="Option @(i + 1)" />
-
+                                           class="form-check-input correct-option"
+                                           name="Questions[${questionIndex}].CorrectOptionIndex"
+                                           value="${i}"
+                                           id="q${questionIndex}_opt${i}" />
+                                    <input class="form-control option-input"
+                                           name="Questions[${questionIndex}].Options[${i}]"
+                                           placeholder="Option ${i + 1}" />
                                     <span class="badge bg-light text-muted">Correct</span>
                                 </div>
-                            }
-
-                            <span class="text-danger small">@Model.OptionError</span>
+                            `).join('')}
                         </div>
-
+                        <span class="text-danger small validation-message d-block mt-2" data-valmsg-for="Questions[${questionIndex}].Options"></span>
+                        <span class="text-danger small validation-message d-block mt-1" data-valmsg-for="Questions[${questionIndex}].CorrectOptionIndex"></span>
                     </div>
                 </div>
+            `;
+            
+            questionsContainer.insertAdjacentHTML('beforeend', questionHtml);
+            updateQuestionNumbers();
+            
+            // Scroll to the new question
+            const newQuestion = questionsContainer.lastElementChild;
+            if (newQuestion) {
+                newQuestion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        };
 
-            </form>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize questions if empty
+            if (document.querySelectorAll('.question-card').length === 0) {
+                window.addQuestion();
+            } else {
+                // Ensure existing questions are properly indexed
+                reindexQuestions();
+            }
 
-        </div>
+            // Add Question button
+            const addQuestionBtn = document.getElementById('add-question-btn');
+            if (addQuestionBtn) {
+                addQuestionBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.addQuestion();
+                });
+            }
 
-        <!-- Right Sidebar -->
-        <div class="col-lg-4">
-            <div class="sticky-top" style="top: 100px">
+            // Preview button
+            document.getElementById('preview-btn')?.addEventListener('click', showPreview);
 
-                <button class="btn btn-primary w-100 mb-3">
-                    <i class="bi bi-plus-lg me-1"></i> Add Question
+            // Privacy buttons
+            document.querySelectorAll('.privacy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.privacy-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    document.getElementById('Privacy').value = this.dataset.privacy;
+                });
+            });
+
+            // Set initial privacy
+            const initialPrivacy = document.getElementById('Privacy').value || 'Public';
+            const privacyBtn = document.querySelector(`.privacy-btn[data-privacy="${initialPrivacy}"]`);
+            if (privacyBtn) {
+                privacyBtn.click();
+            }
+
+        });
+
+        // Make function globally accessible
+        window.addQuestion = function() {
+            const questionsContainer = document.getElementById('questions-container');
+            if (!questionsContainer) {
+                console.error('Questions container not found');
+                return;
+            }
+            
+            const questionIndex = questionsContainer.querySelectorAll('.question-card').length;
+            const questionHtml = `
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="question-number">Question ${questionIndex + 1}</span>
+                            <span class="required-badge">Required</span>
+                        </div>
+                        ${questionIndex > 0 ? `<button type="button" class="btn btn-sm btn-outline-danger remove-question" onclick="removeQuestion(this)">
+                            <i class="bi bi-trash me-1"></i> Remove
+                        </button>` : ''}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            Question Text <span class="required-field">*</span>
+                        </label>
+                        <textarea name="Questions[${questionIndex}].QuestionText"
+                                  class="form-control question-text"
+                                  rows="4"
+                                  placeholder="Enter your question here..."></textarea>
+                        <span class="text-danger small validation-message d-block mt-1" data-valmsg-for="Questions[${questionIndex}].QuestionText"></span>
+                    </div>
+
+                        <div>
+                            <label class="form-label mb-3">
+                                Answer Options <span class="required-field">*</span>
+                                <small class="text-muted d-block mt-1">Click the radio button to mark the correct answer</small>
+                            </label>
+                            <div class="options-container">
+                                ${[0, 1, 2, 3].map(i => `
+                                    <div class="option-row d-flex align-items-center gap-2 mb-2">
+                                        <input type="radio"
+                                               class="form-check-input correct-option"
+                                               name="Questions[${questionIndex}].CorrectOptionIndex"
+                                               value="${i}"
+                                               id="q${questionIndex}_opt${i}" />
+                                        <input class="form-control option-input"
+                                               name="Questions[${questionIndex}].Options[${i}]"
+                                               placeholder="Option ${i + 1}" />
+                                        <span class="badge bg-light text-muted">Correct</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <span class="text-danger small validation-message d-block mt-2" data-valmsg-for="Questions[${questionIndex}].Options"></span>
+                            <span class="text-danger small validation-message d-block mt-1" data-valmsg-for="Questions[${questionIndex}].CorrectOptionIndex"></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            questionsContainer.insertAdjacentHTML('beforeend', questionHtml);
+            updateQuestionNumbers();
+            
+            // Scroll to the new question
+            const newQuestion = questionsContainer.lastElementChild;
+            if (newQuestion) {
+                newQuestion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        };
+
+        window.removeQuestion = function(btn) {
+            if (confirm('Are you sure you want to remove this question?')) {
+                btn.closest('.question-card').remove();
+                reindexQuestions();
+            }
+        };
+
+        function updateQuestionNumbers() {
+            document.querySelectorAll('.question-card').forEach((card, index) => {
+                const questionNumber = card.querySelector('.question-number');
+                if (questionNumber) {
+                    questionNumber.textContent = `Question ${index + 1}`;
+                }
+                
+                // Update remove button visibility
+                const removeBtn = card.querySelector('.remove-question');
+                if (removeBtn) {
+                    if (index === 0) {
+                        removeBtn.style.display = 'none';
+                    } else {
+                        removeBtn.style.display = '';
+                    }
+                }
+            });
+        }
+
+        function reindexQuestions() {
+            const questions = document.querySelectorAll('.question-card');
+            questions.forEach((card, index) => {
+                // Update question text field
+                const questionText = card.querySelector('.question-text');
+                if (questionText) {
+                    questionText.name = `Questions[${index}].QuestionText`;
+                }
+
+                // Update options and radio buttons
+                const options = card.querySelectorAll('.option-input');
+                const radios = card.querySelectorAll('.correct-option');
+                
+                options.forEach((opt, optIndex) => {
+                    opt.name = `Questions[${index}].Options[${optIndex}]`;
+                    const radioId = `q${index}_opt${optIndex}`;
+                });
+
+                radios.forEach((radio, optIndex) => {
+                    radio.name = `Questions[${index}].CorrectOptionIndex`;
+                    radio.id = `q${index}_opt${optIndex}`;
+                });
+
+                // Update remove button visibility
+                const removeBtn = card.querySelector('.remove-question');
+                if (removeBtn) {
+                    if (index === 0) {
+                        removeBtn.style.display = 'none';
+                    } else {
+                        removeBtn.style.display = '';
+                    }
+                }
+            });
+            updateQuestionNumbers();
+        }
+
+        function showPreview() {
+            const title = document.getElementById('QuizTitle').value || 'Untitled Quiz';
+            const questions = Array.from(document.querySelectorAll('.question-card'));
+            
+            let previewHtml = `<h3>${title}</h3><hr>`;
+            questions.forEach((card, qIndex) => {
+                const questionText = card.querySelector('.question-text').value || `Question ${qIndex + 1}`;
+                previewHtml += `<p><strong>Q${qIndex + 1}:</strong> ${questionText}</p>`;
+                const options = Array.from(card.querySelectorAll('.option-input'));
+                options.forEach((opt, oIndex) => {
+                    if (opt.value.trim()) {
+                        const isCorrect = card.querySelector(`input[value="${oIndex}"]:checked`) !== null;
+                        previewHtml += `<div class="ms-3">${isCorrect ? '✓' : '○'} ${opt.value}</div>`;
+                    }
+                });
+                previewHtml += '<hr>';
+            });
+
+            // Simple alert preview (could be enhanced with modal)
+            const previewWindow = window.open('', 'preview', 'width=600,height=400');
+            previewWindow.document.write(`
+                <html>
+                    <head><title>Quiz Preview</title></head>
+                    <body style="font-family: sans-serif; padding: 20px;">
+                        ${previewHtml}
+                    </body>
+                </html>
+            `);
+        }
+    </script>
+}
+
+<div class="create-quiz-page">
+    <!-- Header -->
+    <div class="quiz-header sticky-top" style="z-index: 1020;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 fw-bold mb-1">Create Quiz</h1>
+                <p class="text-muted mb-0">Build and manage your quiz questions</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" id="preview-btn" class="btn btn-outline-secondary">
+                    <i class="bi bi-eye me-2"></i>Preview
                 </button>
+                <button type="submit" form="quiz-form" class="btn btn-primary">
+                    <i class="bi bi-send me-2"></i>Publish
+                </button>
+            </div>
+        </div>
+    </div>
 
-                <div class="card border-2 shadow-sm">
-                    <div class="card-body">
+    <div class="quiz-content">
+        <div class="row g-4">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <form method="post" id="quiz-form">
+                    <!-- Quiz Title -->
+                    <div class="question-card">
+                        <label class="form-label">
+                            Quiz Title <span class="required-field">*</span>
+                        </label>
+                        <input asp-for="QuizTitle"
+                               id="QuizTitle"
+                               class="form-control form-control-lg"
+                               placeholder="Enter your quiz title..." />
+                        <span asp-validation-for="QuizTitle" class="text-danger small d-block mt-1"></span>
+                    </div>
 
-                        <h5 class="fw-semibold mb-3">Assignment & Privacy</h5>
+                    <!-- Questions Container -->
+                    <div id="questions-container">
+                        @if (Model.Questions != null && Model.Questions.Count > 0)
+                        {
+                            @for (int q = 0; q < Model.Questions.Count; q++)
+                            {
+                                <div class="question-card">
+                                    <div class="question-header">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="question-number">Question @(q + 1)</span>
+                                            <span class="required-badge">Required</span>
+                                        </div>
+                                        @if (q > 0)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-question" onclick="removeQuestion(this)">
+                                                <i class="bi bi-trash me-1"></i> Remove
+                                            </button>
+                                        }
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">
+                                            Question Text <span class="required-field">*</span>
+                                        </label>
+                                        <textarea asp-for="Questions[q].QuestionText"
+                                                  class="form-control question-text"
+                                                  rows="4"
+                                                  placeholder="Enter your question here..."></textarea>
+                                        <span asp-validation-for="Questions[q].QuestionText" class="text-danger small d-block mt-1"></span>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label mb-3">
+                                            Answer Options <span class="required-field">*</span>
+                                            <small class="text-muted d-block mt-1">Select the correct answer by clicking the radio button</small>
+                                        </label>
+                                        <div class="options-container">
+                                            @for (int i = 0; i < Model.Questions[q].Options.Count; i++)
+                                            {
+                                                <div class="option-row d-flex align-items-center gap-2 mb-2">
+                                                    <input type="radio"
+                                                           class="form-check-input correct-option"
+                                                           name="Questions[@q].CorrectOptionIndex"
+                                                           value="@i"
+                                                           id="q@(q)_opt@(i)"
+                                                           @(Model.Questions[q].CorrectOptionIndex == i ? "checked" : "") />
+                                                    <input class="form-control option-input"
+                                                           name="Questions[@q].Options[@i]"
+                                                           value="@Model.Questions[q].Options[i]"
+                                                           placeholder="Option @(i + 1)" />
+                                                    <span class="badge bg-light text-muted">Correct</span>
+                                                </div>
+                                            }
+                                        </div>
+                                        <span asp-validation-for="Questions[q].Options" class="text-danger small d-block mt-2"></span>
+                                        <span asp-validation-for="Questions[q].CorrectOptionIndex" class="text-danger small d-block mt-1"></span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="col-lg-4">
+                <div class="sticky-top" style="top: 100px; z-index: 1010;">
+                    <button type="button" id="add-question-btn" class="btn btn-primary w-100 mb-3" style="padding: 0.75rem;">
+                        <i class="bi bi-plus-lg me-2"></i>Add Question
+                    </button>
+
+                    <div class="sidebar-card">
+                        <h5 class="fw-bold mb-3">Assignment & Privacy</h5>
 
                         <!-- Due Date -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Due Date</label>
-                            <input type="date" class="form-control" />
+                        <div class="mb-4">
+                            <label class="form-label">Due Date</label>
+                            <input type="date" 
+                                   asp-for="DueDate"
+                                   class="form-control" />
                         </div>
 
                         <!-- Privacy -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Privacy</label>
-
-                            <div class="d-grid gap-2">
-                                <button type="button" class="btn btn-outline-secondary text-start">
-                                    Public (everyone)
+                        <div class="mb-4">
+                            <label class="form-label">Privacy</label>
+                            <input type="hidden" asp-for="Privacy" id="Privacy" />
+                            <div>
+                                <button type="button" 
+                                        class="privacy-option privacy-btn w-100"
+                                        data-privacy="Public">
+                                    <i class="bi bi-globe me-2"></i>Public (everyone)
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary text-start">
-                                    Private (assigned only)
+                                <button type="button" 
+                                        class="privacy-option privacy-btn w-100"
+                                        data-privacy="Private">
+                                    <i class="bi bi-lock me-2"></i>Private (assigned only)
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary text-start">
-                                    Link-only
+                                <button type="button" 
+                                        class="privacy-option privacy-btn w-100"
+                                        data-privacy="Link">
+                                    <i class="bi bi-link-45deg me-2"></i>Link-only
                                 </button>
                             </div>
                         </div>
 
                         <!-- Assign -->
                         <div>
-                            <label class="form-label fw-semibold">Assign to</label>
-                            <input class="form-control"
+                            <label class="form-label">Assign to</label>
+                            <input asp-for="AssignTo"
+                                   class="form-control"
                                    placeholder="Select students or groups..." />
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </div>
-
     </div>
 </div>
