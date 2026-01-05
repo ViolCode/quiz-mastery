@@ -14,15 +14,6 @@ namespace PL.Pages.Teacher
         [BindProperty]
         public List<QuestionModel> Questions { get; set; } = new();
 
-        [BindProperty]
-        public string Privacy { get; set; } = "Public";
-
-        [BindProperty]
-        public DateTime? DueDate { get; set; }
-
-        [BindProperty]
-        public string AssignTo { get; set; } = string.Empty;
-
         public void OnGet()
         {
             // Initialize with one empty question
@@ -102,4 +93,3 @@ namespace PL.Pages.Teacher
         public int? CorrectOptionIndex { get; set; }
     }
 }
-
