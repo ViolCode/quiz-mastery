@@ -1,7 +1,7 @@
 ﻿@page
 @model PL.Pages.Teacher.TeacherDashboardModel
 @{
-    Layout = "_Layout";
+    Layout = "_TeacherLayout";
     ViewData["Title"] = "Teacher Dashboard";
 }
 
@@ -18,9 +18,6 @@
             </div>
             <div class="d-flex gap-2">
                 <a asp-page="/Teacher/CreateQuiz" class="btn btn-primary">Create Quiz</a>
-                <form method="post" asp-page-handler="Logout">
-                    <button type="submit" class="btn btn-outline-danger">Logout</button>
-                </form>
             </div>
         </div>
 

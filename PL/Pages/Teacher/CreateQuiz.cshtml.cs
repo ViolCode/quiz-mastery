@@ -1,26 +1,29 @@
+using Contracts.Enums;
+using Contracts.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Contracts.Enums;
 
 namespace PL.Pages.Teacher
 {
     [Authorize(Roles = nameof(Role.Teacher))]
     public class CreateQuizModel : PageModel
     {
+        private readonly IQuizService _quizService;
+
+        public CreateQuizModel(IQuizService quizService)
+        {
+            _quizService = quizService;
+        }
+
         [BindProperty]
         public string QuizTitle { get; set; } = string.Empty;
 
         [BindProperty]
-        public string QuestionText { get; set; } = string.Empty;
-
-        [BindProperty]
-        public List<string> Options { get; set; } = new() { "", "", "", "" };
-
-        [BindProperty]
-        public int? CorrectOptionIndex { get; set; }
-
-        public string OptionError { get; set; } = string.Empty;
+        public List<CreateQuizQuestionModel> Questions { get; set; } = new()
+        {
+            new CreateQuizQuestionModel()
+        };
 
         public void OnGet()
         {
@@ -33,27 +36,30 @@ namespace PL.Pages.Teacher
                 ModelState.AddModelError(nameof(QuizTitle), "Quiz title is required.");
             }
 
-            if (string.IsNullOrWhiteSpace(QuestionText))
+            if (Questions == null || Questions.Count == 0)
             {
-                ModelState.AddModelError(nameof(QuestionText), "Question text is required.");
+                ModelState.AddModelError(string.Empty, "At least one question is required.");
             }
 
-            for (int i = 0; i < Options.Count; i++)
+            foreach (var q in Questions)
             {
-                Options[i] = Options[i]?.Trim() ?? string.Empty;
-            }
+                if (string.IsNullOrWhiteSpace(q.QuestionText))
+                {
+                    ModelState.AddModelError(string.Empty, "All questions must have text.");
+                }
 
-            var filledOptions = Options.Where(o => !string.IsNullOrWhiteSpace(o)).ToList();
-            if (filledOptions.Count < 2)
-            {
-                OptionError = "Please provide at least two answer options.";
-                ModelState.AddModelError(nameof(Options), OptionError);
-            }
+                var filledOptions = q.Options.Where(o => !string.IsNullOrWhiteSpace(o)).ToList();
+                if (filledOptions.Count < 2)
+                {
+                    ModelState.AddModelError(string.Empty, "Each question must have at least two options.");
+                }
 
-            if (CorrectOptionIndex is null || CorrectOptionIndex < 0 || CorrectOptionIndex >= Options.Count || string.IsNullOrWhiteSpace(Options[CorrectOptionIndex.Value]))
-            {
-                OptionError = "Please select which option is correct.";
-                ModelState.AddModelError(nameof(CorrectOptionIndex), OptionError);
+                if (q.CorrectOptionIndex == null ||
+                    q.CorrectOptionIndex < 0 ||
+                    q.CorrectOptionIndex >= q.Options.Count)
+                {
+                    ModelState.AddModelError(string.Empty, "Each question must have a correct answer selected.");
+                }
             }
 
             if (!ModelState.IsValid)
@@ -61,9 +67,15 @@ namespace PL.Pages.Teacher
                 return Page();
             }
 
-            TempData["Message"] = "Quiz was siccessfully created.";
+            // VisibilityId: 1 = Public (you can wire UI later)
+            _quizService.CreateQuiz(
+                QuizTitle,
+                visibilityId: 1,
+                questions: Questions
+            );
+
+            TempData["Message"] = "Quiz successfully created.";
             return RedirectToPage("/Teacher/TeacherDashboard");
         }
     }
 }
-

@@ -1,13 +1,17 @@
 ﻿@page
 @model PL.Pages.Auth.LoginModel
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Login";
 }
 
 <div class="auth-page bg-light">
     <div class="container">
         <div class="auth-form">
-            <h3 class="text-center mb-4">Login</h3>
+            <div class="text-center mb-4">
+                <h1 class="fw-bold text-foreground">Quiz Mastery</h1>
+                <h5 class="text-muted">Login</h5>
+            </div>
 
             <form method="post" novalidate>
                 <div asp-validation-summary="ModelOnly" class="text-danger small" style="list-style:none;"></div>

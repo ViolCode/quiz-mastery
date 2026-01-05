@@ -1,73 +1,293 @@
 @page
 @model PL.Pages.Teacher.CreateQuizModel
 @{
-    Layout = "_Layout";
+    Layout = "_TeacherLayout";
     ViewData["Title"] = "Create Quiz";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="fw-bold mb-1">Create Quiz</h2>
-                    <p class="text-muted mb-0">Single-answer questions</p>
-                </div>
-                <a asp-page="/Teacher/TeacherDashboard" class="btn btn-link text-decoration-none">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
-                </a>
-            </div>
-
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
-
-                    <form method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Quiz title</label>
-                            <input asp-for="QuizTitle" class="form-control" placeholder="Enter the quiz title" />
-                            <span asp-validation-for="QuizTitle" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Question</label>
-                            <textarea asp-for="QuestionText" class="form-control" rows="3" placeholder="Enter the question text"></textarea>
-                            <span asp-validation-for="QuestionText" class="text-danger small"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label d-flex justify-content-between">
-                                <span>Answer options</span>
-                                <small class="text-muted">Select the correct one</small>
-                            </label>
-
-                            @for (int i = 0; i < Model.Options.Count; i++)
-                            {
-                                <div class="input-group mb-2">
-                                    <div class="input-group-text">
-                                        <input class="form-check-input mt-0" type="radio" name="CorrectOptionIndex" value="@i" @(Model.CorrectOptionIndex == i ? "checked" : "") />
-                                    </div>
-                                    <input class="form-control" name="Options[@i]" value="@Model.Options[i]" placeholder="Option @(i + 1)" />
-                                </div>
-                            }
-                            <span class="text-danger small">@Model.OptionError</span>
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">Save Quiz</button>
-                            <a asp-page="/Teacher/TeacherDashboard" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            @if (TempData["Message"] != null)
-            {
-                <div class="alert alert-success mt-4">
-                    @TempData["Message"]
-                </div>
-            }
+<!-- Sticky Top Bar -->
+<div class="sticky-top bg-white border-bottom shadow-sm">
+    <div class="container-fluid px-4 py-3 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h4 fw-bold mb-0">Create Quiz</h1>
+            <small class="text-muted">Build and manage your quiz</small>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" form="quiz-form" class="btn btn-primary btn-sm">
+                <i class="bi bi-send me-1"></i> Publish
+            </button>
         </div>
     </div>
 </div>
 
+<div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+
+        <!-- Main Content -->
+        <div class="col-lg-8">
+
+            <form method="post" id="quiz-form" class="d-grid gap-4">
+
+                <!-- Quiz Title -->
+                <div class="card border-2 shadow-sm">
+                    <div class="card-body">
+                        <label class="form-label fw-semibold">
+                            Quiz Title <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="QuizTitle"
+                               class="form-control form-control-lg"
+                               placeholder="Enter your quiz title..." />
+                        <span asp-validation-for="QuizTitle" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Questions Container -->
+                <div id="questions-container">
+                    @if (Model.Questions != null && Model.Questions.Count > 0)
+                    {
+                        @for (int q = 0; q < Model.Questions.Count; q++)
+                        {
+                            <div class="question-card card border-2 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-secondary me-2">Q@(q + 1)</span>
+                                            <span class="text-muted small">Required</span>
+                                        </div>
+                                        @if (q > 0)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-question" onclick="removeQuestion(this)">
+                                                <i class="bi bi-trash me-1"></i> Remove
+                                            </button>
+                                        }
+                                    </div>
+
+                                    <label class="form-label fw-semibold">
+                                        Question Text <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea asp-for="Questions[q].QuestionText"
+                                              class="form-control question-text"
+                                              rows="4"
+                                              placeholder="Enter your question..."></textarea>
+                                    <span asp-validation-for="Questions[q].QuestionText" class="text-danger small"></span>
+
+                                    <!-- Options -->
+                                    <div class="mt-4">
+                                        <label class="form-label fw-semibold">
+                                            Options <span class="text-danger">*</span>
+                                        </label>
+
+                                        @for (int i = 0; i < Model.Questions[q].Options.Count; i++)
+                                        {
+                                            <div class="d-flex align-items-center gap-2 mb-2">
+                                                <input type="radio"
+                                                       class="form-check-input"
+                                                       name="Questions[@q].CorrectOptionIndex"
+                                                       value="@i"
+                                                       id="q@(q)_opt@(i)"
+                                                       @(Model.Questions[q].CorrectOptionIndex == i ? "checked" : "") />
+
+                                                <input class="form-control option-input"
+                                                       name="Questions[@q].Options[@i]"
+                                                       value="@Model.Questions[q].Options[i]"
+                                                       placeholder="Option @(i + 1)" />
+
+                                                <span class="badge bg-light text-muted">Correct</span>
+                                            </div>
+                                        }
+
+                                        <span asp-validation-for="Questions[q].Options" class="text-danger small"></span>
+                                        <span asp-validation-for="Questions[q].CorrectOptionIndex" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+            </form>
+
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 100px">
+
+                <button type="button" id="add-question-btn" class="btn btn-primary w-100 mb-3">
+                    <i class="bi bi-plus-lg me-1"></i> Add Question
+                </button>
+
+                <div class="card border-2 shadow-sm">
+                    <div class="card-body">
+
+                        <h5 class="fw-semibold mb-3">Assignment & Privacy</h5>
+
+                        <!-- Due Date -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Due Date</label>
+                            <input type="date" class="form-control" />
+                        </div>
+
+                        <!-- Privacy -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Privacy</label>
+
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-outline-secondary text-start">
+                                    Public (everyone)
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary text-start">
+                                    Private (assigned only)
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary text-start">
+                                    Link-only
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Assign -->
+                        <div>
+                            <label class="form-label fw-semibold">Assign to</label>
+                            <input class="form-control"
+                                   placeholder="Select students or groups..." />
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize questions if empty
+            if (document.querySelectorAll('.question-card').length === 0) {
+                addQuestion();
+            }
+
+            // Add Question button
+            document.getElementById('add-question-btn')?.addEventListener('click', addQuestion);
+        });
+
+        function addQuestion() {
+            const questionsContainer = document.getElementById('questions-container');
+            if (!questionsContainer) {
+                console.error('Questions container not found');
+                return;
+            }
+            
+            const questionIndex = questionsContainer.querySelectorAll('.question-card').length;
+            const questionHtml = `
+                <div class="question-card card border-2 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-2">Q${questionIndex + 1}</span>
+                                <span class="text-muted small">Required</span>
+                            </div>
+                            ${questionIndex > 0 ? `<button type="button" class="btn btn-sm btn-outline-danger remove-question" onclick="removeQuestion(this)">
+                                <i class="bi bi-trash me-1"></i> Remove
+                            </button>` : ''}
+                        </div>
+
+                        <label class="form-label fw-semibold">
+                            Question Text <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="Questions[${questionIndex}].QuestionText"
+                                  class="form-control question-text"
+                                  rows="4"
+                                  placeholder="Enter your question..."></textarea>
+                        <span class="text-danger small" data-valmsg-for="Questions[${questionIndex}].QuestionText"></span>
+
+                        <div class="mt-4">
+                            <label class="form-label fw-semibold">
+                                Options <span class="text-danger">*</span>
+                            </label>
+                            ${[0, 1, 2, 3].map(i => `
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <input type="radio"
+                                           class="form-check-input"
+                                           name="Questions[${questionIndex}].CorrectOptionIndex"
+                                           value="${i}"
+                                           id="q${questionIndex}_opt${i}" />
+                                    <input class="form-control option-input"
+                                           name="Questions[${questionIndex}].Options[${i}]"
+                                           placeholder="Option ${i + 1}" />
+                                    <span class="badge bg-light text-muted">Correct</span>
+                                </div>
+                            `).join('')}
+                            <span class="text-danger small" data-valmsg-for="Questions[${questionIndex}].Options"></span>
+                            <span class="text-danger small" data-valmsg-for="Questions[${questionIndex}].CorrectOptionIndex"></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            questionsContainer.insertAdjacentHTML('beforeend', questionHtml);
+            updateQuestionNumbers();
+            
+            // Scroll to the new question
+            const newQuestion = questionsContainer.lastElementChild;
+            if (newQuestion) {
+                newQuestion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function removeQuestion(btn) {
+            if (confirm('Are you sure you want to remove this question?')) {
+                btn.closest('.question-card').remove();
+                updateQuestionNumbers();
+                reindexQuestions();
+            }
+        }
+
+        function updateQuestionNumbers() {
+            document.querySelectorAll('.question-card').forEach((card, index) => {
+                const badge = card.querySelector('.badge');
+                if (badge) {
+                    badge.textContent = `Q${index + 1}`;
+                }
+                
+                // Update remove button visibility
+                const removeBtn = card.querySelector('.remove-question');
+                if (removeBtn) {
+                    if (index === 0) {
+                        removeBtn.style.display = 'none';
+                    } else {
+                        removeBtn.style.display = '';
+                    }
+                }
+            });
+        }
+
+        function reindexQuestions() {
+            const questions = document.querySelectorAll('.question-card');
+            questions.forEach((card, index) => {
+                // Update question text field
+                const questionText = card.querySelector('.question-text');
+                if (questionText) {
+                    questionText.name = `Questions[${index}].QuestionText`;
+                }
+
+                // Update options and radio buttons
+                const options = card.querySelectorAll('.option-input');
+                const radios = card.querySelectorAll('input[type="radio"]');
+                
+                options.forEach((opt, optIndex) => {
+                    opt.name = `Questions[${index}].Options[${optIndex}]`;
+                });
+
+                radios.forEach((radio, optIndex) => {
+                    radio.name = `Questions[${index}].CorrectOptionIndex`;
+                    radio.id = `q${index}_opt${optIndex}`;
+                });
+            });
+            updateQuestionNumbers();
+        }
+    </script>
+}
