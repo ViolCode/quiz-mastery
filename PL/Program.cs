@@ -31,6 +31,9 @@ builder.Services.AddScoped<IRoleMapper, RoleMapper>();
 builder.Services.AddScoped<IUserAccess>(sp =>
     new DAL.Repositorys.UserAccess(connectionString, sp.GetRequiredService<IRoleMapper>()));
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IQuizAccess>(sp =>
+    new DAL.Repositorys.QuizAccess(connectionString));
+builder.Services.AddScoped<IQuizService, QuizService>();
 
 var app = builder.Build();
 
