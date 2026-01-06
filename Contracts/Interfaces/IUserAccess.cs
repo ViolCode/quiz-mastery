@@ -9,6 +9,7 @@ namespace Contracts.Interfaces
 {
     public interface IUserAccess
     {
+        UserDto? GetUserById(int id);
         UserDto? GetUserByEmail(string email);  
         List<UserDto> GetAllUsers();
         List<(int Id, string Name)> GetAllRoles();

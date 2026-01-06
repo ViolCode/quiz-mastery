@@ -1,6 +1,5 @@
 using Contracts.DTOs;
 using Contracts.Interfaces;
-
 namespace BLL.Services
 {
     public class QuizService : IQuizService
@@ -12,43 +11,57 @@ namespace BLL.Services
             _quizAccess = quizAccess;
         }
 
-        public void CreateQuiz(string title, int visibilityId, List<CreateQuizQuestionModel> questions)
+        public void CreateQuiz(int teacherId, CreateQuizRequestDTO request)
         {
             var quiz = new QuizDto
             {
-                Title = title,
-                VisibilityId = visibilityId,
+                Title = request.Title,
+                VisibilityId = request.VisibilityId,
                 CreatedAt = DateTime.UtcNow
             };
 
             var quizId = _quizAccess.CreateQuiz(quiz);
 
-            // Hardcode question_type_id to 1 (SingleChoice)
+            _quizAccess.CreateTeacherAssignment(teacherId, quizId);
+
             const int singleChoiceTypeId = 1;
 
-            foreach (var questionModel in questions)
+            foreach (var question in request.Questions)
             {
-                var questionId = _quizAccess.CreateQuestion(quizId, questionModel.QuestionText, singleChoiceTypeId);
+                var questionId = _quizAccess.CreateQuestion(
+                    quizId,
+                    question.QuestionText,
+                    singleChoiceTypeId
+                );
 
                 int? correctAnswerId = null;
 
-                for (int i = 0; i < questionModel.Options.Count; i++)
+                for (int i = 0; i < question.Options.Count; i++)
                 {
-                    var optionText = questionModel.Options[i];
-                    var isCorrect = questionModel.CorrectOptionIndex == i;
-                    
-                    var answerId = _quizAccess.CreateAnswer(questionId, optionText, isCorrect);
-                    
+                    var isCorrect = question.CorrectOptionIndex == i;
+
+                    var answerId = _quizAccess.CreateAnswer(
+                        questionId,
+                        question.Options[i],
+                        isCorrect
+                    );
+
                     if (isCorrect)
-                    {
                         correctAnswerId = answerId;
-                    }
                 }
 
                 if (correctAnswerId.HasValue)
                 {
-                    _quizAccess.UpdateQuestionCorrectAnswer(questionId, correctAnswerId.Value);
+                    _quizAccess.UpdateQuestionCorrectAnswer(
+                        questionId,
+                        correctAnswerId.Value
+                    );
                 }
+            }
+
+            foreach (var studentId in request.AssignedStudentIds.Distinct())
+            {
+                _quizAccess.AssignQuizToStudent(studentId, quizId);
             }
         }
     }

@@ -22,6 +22,32 @@ namespace DAL.Repositorys
             _roleMapper = roleMapper;
         }
 
+        public UserDto? GetUserById(int id)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+                SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id
+                FROM [User] u
+                WHERE u.Id = @Id", conn);
+
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+                return null;
+
+            return new UserDto
+            {
+                Id = reader.GetInt32(0),
+                Name = reader.GetString(1),
+                Email = reader.GetString(2),
+                PasswordHash = reader.GetString(3),
+                Role = _roleMapper.FromId(reader.GetInt32(4))
+            };
+        }
+
         public UserDto? GetUserByEmail(string email)
         {
             using var conn = new SqlConnection(_connectionString);

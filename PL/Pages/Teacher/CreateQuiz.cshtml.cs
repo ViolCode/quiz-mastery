@@ -1,8 +1,10 @@
+using Contracts.DTOs;
 using Contracts.Enums;
 using Contracts.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 
 namespace PL.Pages.Teacher
 {
@@ -20,9 +22,9 @@ namespace PL.Pages.Teacher
         public string QuizTitle { get; set; } = string.Empty;
 
         [BindProperty]
-        public List<CreateQuizQuestionModel> Questions { get; set; } = new()
+        public List<CreateQuizQuestionDTO> Questions { get; set; } = new()
         {
-            new CreateQuizQuestionModel()
+            new CreateQuizQuestionDTO()
         };
 
         public void OnGet()
@@ -63,16 +65,23 @@ namespace PL.Pages.Teacher
             }
 
             if (!ModelState.IsValid)
-            {
                 return Page();
-            }
 
-            // VisibilityId: 1 = Public (you can wire UI later)
-            _quizService.CreateQuiz(
-                QuizTitle,
-                visibilityId: 1,
-                questions: Questions
-            );
+            var teacherIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(teacherIdClaim))
+                return RedirectToPage("/Auth/Login");
+
+            var teacherId = int.Parse(teacherIdClaim);
+
+            var request = new CreateQuizRequestDTO
+            {
+                Title = QuizTitle,
+                VisibilityId = 1, // Public for now
+                Questions = Questions,
+                AssignedStudentIds = new() // empty for now
+            };
+
+            _quizService.CreateQuiz(teacherId, request);
 
             TempData["Message"] = "Quiz successfully created.";
             return RedirectToPage("/Teacher/TeacherDashboard");

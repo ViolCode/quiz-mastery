@@ -64,6 +64,36 @@ namespace DAL.Repositorys
             return answerId;
         }
 
+        public void CreateTeacherAssignment(int teacherId, int quizId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+        INSERT INTO teacher_assignment (teacher_id, quiz_id, created_at)
+        VALUES (@TeacherId, @QuizId, GETUTCDATE())", conn);
+
+            cmd.Parameters.AddWithValue("@TeacherId", teacherId);
+            cmd.Parameters.AddWithValue("@QuizId", quizId);
+
+            cmd.ExecuteNonQuery();
+        }
+
+        public void AssignQuizToStudent(int studentId, int quizId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+        INSERT INTO student_assignment (student_id, quiz_id, assigned_at)
+        VALUES (@StudentId, @QuizId, GETUTCDATE())", conn);
+
+            cmd.Parameters.AddWithValue("@StudentId", studentId);
+            cmd.Parameters.AddWithValue("@QuizId", quizId);
+
+            cmd.ExecuteNonQuery();
+        }
+
         public void UpdateQuestionCorrectAnswer(int questionId, int correctAnswerId)
         {
             using var conn = new SqlConnection(_connectionString);
