@@ -12,23 +12,31 @@ namespace PL.Pages.Teacher
     public class CreateQuizModel : PageModel
     {
         private readonly IQuizService _quizService;
+        private readonly IUserService _userService;
 
-        public CreateQuizModel(IQuizService quizService)
+        public CreateQuizModel(IQuizService quizService, IUserService userService)
         {
             _quizService = quizService;
+            _userService = userService;
         }
+
+        public List<UserDto> Students { get; set; } = new();
+
+        [BindProperty]
+        public List<int> SelectedStudentIds { get; set; } = new();
 
         [BindProperty]
         public string QuizTitle { get; set; } = string.Empty;
 
         [BindProperty]
-        public List<CreateQuizQuestionDTO> Questions { get; set; } = new()
+        public List<CreateQuizQuestionModel> Questions { get; set; } = new()
         {
-            new CreateQuizQuestionDTO()
+            new CreateQuizQuestionModel()
         };
 
         public void OnGet()
         {
+            Students = _userService.GetAllStudents();
         }
 
         public IActionResult OnPost()
@@ -64,6 +72,8 @@ namespace PL.Pages.Teacher
                 }
             }
 
+            Students = _userService.GetAllStudents();
+
             if (!ModelState.IsValid)
                 return Page();
 
@@ -78,7 +88,7 @@ namespace PL.Pages.Teacher
                 Title = QuizTitle,
                 VisibilityId = 1, // Public for now
                 Questions = Questions,
-                AssignedStudentIds = new() // empty for now
+                AssignedStudentIds = SelectedStudentIds
             };
 
             _quizService.CreateQuiz(teacherId, request);

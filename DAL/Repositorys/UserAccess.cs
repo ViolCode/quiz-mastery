@@ -148,5 +148,34 @@ namespace DAL.Repositorys
             }
             return users;
         }
+
+        public List<UserDto> GetAllStudents()
+        {
+            var students = new List<UserDto>();
+
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+        SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id
+        FROM [User] u
+        WHERE u.Role_Id = 1", conn); // 1 = Student
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                students.Add(new UserDto
+                {
+                    Id = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    Email = reader.GetString(2),
+                    PasswordHash = reader.GetString(3),
+                    Role = _roleMapper.FromId(reader.GetInt32(4))
+                });
+            }
+
+            return students;
+        }
+
     }
 }

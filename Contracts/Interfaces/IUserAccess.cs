@@ -13,6 +13,7 @@ namespace Contracts.Interfaces
         UserDto? GetUserByEmail(string email);  
         List<UserDto> GetAllUsers();
         List<(int Id, string Name)> GetAllRoles();
+        List<UserDto> GetAllStudents();
         void CreateUser(UserDto user);          
         void UpdateUser(UserDto user);          
         void DeleteUser(int id);                 

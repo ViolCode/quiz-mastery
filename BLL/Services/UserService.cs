@@ -56,5 +56,10 @@ namespace BLL.Services
         {
             return _userAccess.GetAllRoles();
         }
+
+        public List<UserDto> GetAllStudents()
+        {
+            return _userAccess.GetAllStudents();
+        }
     }
 }
