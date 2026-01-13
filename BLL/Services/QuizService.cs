@@ -21,15 +21,15 @@ namespace BLL.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            var quizId = _quizAccess.CreateQuiz(quiz);
+            int quizId = _quizAccess.CreateQuiz(quiz);
 
-            _quizAccess.CreateTeacherAssignment(teacherId, quizId);
+            int assignmentId = _quizAccess.CreateTeacherAssignment(teacherId, quizId);
 
             const int singleChoiceTypeId = 1;
 
             foreach (var question in request.Questions)
             {
-                var questionId = _quizAccess.CreateQuestion(
+                int questionId = _quizAccess.CreateQuestion(
                     quizId,
                     question.QuestionText,
                     singleChoiceTypeId
@@ -39,9 +39,8 @@ namespace BLL.Services
 
                 for (int i = 0; i < question.Options.Count; i++)
                 {
-                    var isCorrect = question.CorrectOptionIndex == i;
-
-                    var answerId = _quizAccess.CreateAnswer(
+                    bool isCorrect = question.CorrectOptionIndex == i;
+                    int answerId = _quizAccess.CreateAnswer(
                         questionId,
                         question.Options[i],
                         isCorrect
@@ -62,8 +61,19 @@ namespace BLL.Services
 
             foreach (var studentId in request.AssignedStudentIds.Distinct())
             {
-                _quizAccess.AssignQuizToStudent(studentId, quizId);
+                _quizAccess.AssignAssignmentToStudent(studentId, assignmentId);
             }
         }
+
+        public List<QuizDto> GetQuizzesForStudent(int studentId)
+        {
+            return _quizAccess.GetQuizzesAssignedToStudent(studentId);
+        }
+
+        public List<QuizDto> GetQuizzesForTeacher(int teacherId)
+        {
+            return _quizAccess.GetQuizzesCreatedByTeacher(teacherId);
+        }
+
     }
 }

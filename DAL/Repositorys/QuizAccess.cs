@@ -64,32 +64,33 @@ namespace DAL.Repositorys
             return answerId;
         }
 
-        public void CreateTeacherAssignment(int teacherId, int quizId)
+        public int CreateTeacherAssignment(int teacherId, int quizId)
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
             var cmd = new SqlCommand(@"
-        INSERT INTO teacher_assignment (teacher_id, quiz_id, created_at)
-        VALUES (@TeacherId, @QuizId, GETUTCDATE())", conn);
+                INSERT INTO teacher_assignment (teacher_id, quiz_id, created_at)
+                OUTPUT INSERTED.id
+                VALUES (@TeacherId, @QuizId, GETUTCDATE())", conn);
 
             cmd.Parameters.AddWithValue("@TeacherId", teacherId);
             cmd.Parameters.AddWithValue("@QuizId", quizId);
 
-            cmd.ExecuteNonQuery();
+            return (int)cmd.ExecuteScalar();
         }
 
-        public void AssignQuizToStudent(int studentId, int quizId)
+        public void AssignAssignmentToStudent(int studentId, int assignmentId)
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
             var cmd = new SqlCommand(@"
-        INSERT INTO student_assignment (student_id, quiz_id, assigned_at)
-        VALUES (@StudentId, @QuizId, GETUTCDATE())", conn);
+                INSERT INTO student_assignment (student_id, assignment_id, assigned_at)
+                VALUES (@StudentId, @AssignmentId, GETUTCDATE())", conn);
 
             cmd.Parameters.AddWithValue("@StudentId", studentId);
-            cmd.Parameters.AddWithValue("@QuizId", quizId);
+            cmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
 
             cmd.ExecuteNonQuery();
         }
@@ -107,6 +108,73 @@ namespace DAL.Repositorys
             cmd.Parameters.AddWithValue("@CorrectAnswerId", correctAnswerId);
             
             cmd.ExecuteNonQuery();
+        }
+
+        public List<QuizDto> GetQuizzesAssignedToStudent(int studentId)
+        {
+            var quizzes = new List<QuizDto>();
+
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+                SELECT DISTINCT
+                    q.id,
+                    q.title,
+                    q.visibility_id,
+                    q.created_at
+                FROM quiz q
+                JOIN teacher_assignment ta ON ta.quiz_id = q.id
+                JOIN student_assignment sa ON sa.assignment_id = ta.id
+                WHERE sa.student_id = @StudentId
+                ORDER BY q.created_at DESC", conn);
+
+            cmd.Parameters.AddWithValue("@StudentId", studentId);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                quizzes.Add(new QuizDto
+                {
+                    Id = reader.GetInt32(0),
+                    Title = reader.GetString(1),
+                    VisibilityId = reader.GetInt32(2),
+                    CreatedAt = reader.GetDateTime(3)
+                });
+            }
+
+            return quizzes;
+        }
+
+        public List<QuizDto> GetQuizzesCreatedByTeacher(int teacherId)
+        {
+            var quizzes = new List<QuizDto>();
+
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+                SELECT q.Id, q.Title, q.Visibility_Id, q.Created_At
+                FROM quiz q
+                JOIN teacher_assignment ta ON ta.quiz_id = q.id
+                WHERE ta.teacher_id = @TeacherId
+                ORDER BY q.Created_At DESC", conn);
+
+            cmd.Parameters.AddWithValue("@TeacherId", teacherId);
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                quizzes.Add(new QuizDto
+                {
+                    Id = reader.GetInt32(0),
+                    Title = reader.GetString(1),
+                    VisibilityId = reader.GetInt32(2),
+                    CreatedAt = reader.GetDateTime(3)
+                });
+            }
+
+            return quizzes;
         }
     }
 }
