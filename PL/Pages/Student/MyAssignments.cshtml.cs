@@ -32,5 +32,4 @@ namespace PL.Pages.Student
             return Page();
         }
     }
-
 }

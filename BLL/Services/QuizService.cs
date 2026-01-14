@@ -25,24 +25,28 @@ namespace BLL.Services
 
             int assignmentId = _quizAccess.CreateTeacherAssignment(teacherId, quizId);
 
-            const int singleChoiceTypeId = 1;
-
+            // 3. Create questions and answers
             foreach (var question in request.Questions)
             {
                 int questionId = _quizAccess.CreateQuestion(
                     quizId,
                     question.QuestionText,
-                    singleChoiceTypeId
+                    questionTypeId: 1 // SingleChoice
                 );
 
                 int? correctAnswerId = null;
 
                 for (int i = 0; i < question.Options.Count; i++)
                 {
+                    var optionText = question.Options[i];
+                    if (string.IsNullOrWhiteSpace(optionText))
+                        continue;
+
                     bool isCorrect = question.CorrectOptionIndex == i;
+
                     int answerId = _quizAccess.CreateAnswer(
                         questionId,
-                        question.Options[i],
+                        optionText,
                         isCorrect
                     );
 
@@ -59,7 +63,8 @@ namespace BLL.Services
                 }
             }
 
-            foreach (var studentId in request.AssignedStudentIds.Distinct())
+            // 4. Assign quiz to selected students
+            foreach (var studentId in request.AssignedStudentIds)
             {
                 _quizAccess.AssignAssignmentToStudent(studentId, assignmentId);
             }

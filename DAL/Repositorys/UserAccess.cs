@@ -129,11 +129,11 @@ namespace DAL.Repositorys
             var users = new List<UserDto>();
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
+
             var cmd = new SqlCommand(@"
-                SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id, r.Name AS RoleName
-                FROM [User] u
-                JOIN [User_Role] r ON u.Role_Id = r.Id
-                WHERE u.Email=@Email", conn);
+                SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id
+                FROM [User] u", conn);
+
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
@@ -148,6 +148,7 @@ namespace DAL.Repositorys
             }
             return users;
         }
+
 
         public List<UserDto> GetAllStudents()
         {
