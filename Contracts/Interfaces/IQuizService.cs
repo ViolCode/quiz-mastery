@@ -1,8 +1,12 @@
+using Contracts.DTOs;
+
 namespace Contracts.Interfaces
 {
     public interface IQuizService
     {
-        void CreateQuiz(string title, int visibilityId, List<CreateQuizQuestionModel> questions);
+        void CreateQuiz(int teacherId, CreateQuizRequestDTO request);
+        List<QuizDto> GetQuizzesForStudent(int studentId);
+        List<QuizDto> GetQuizzesForTeacher(int teacherId);
     }
 
     public class CreateQuizQuestionModel

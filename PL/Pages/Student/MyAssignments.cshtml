@@ -1,0 +1,37 @@
+﻿@page
+@model PL.Pages.Student.MyAssignmentsModel
+@{
+    Layout = "_StudentLayout";
+    ViewData["Title"] = "My Assignments";
+}
+
+<h2 class="mb-4">My Assignments</h2>
+
+@if (!Model.Quizzes.Any())
+{
+    <div class="alert alert-info">
+        You have no assigned quizzes.
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var quiz in Model.Quizzes)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@quiz.Title</h5>
+                        <p class="text-muted small">
+                            Assigned on @quiz.CreatedAt.ToLocalTime().ToShortDateString()
+                        </p>
+
+                        <a class="btn btn-primary btn-sm">
+                            Start Quiz
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -23,11 +23,21 @@ namespace PL.Pages.Student
 
         public IActionResult OnGet()
         {
-            string email = User.FindFirstValue(ClaimTypes.Name);
-            if (string.IsNullOrEmpty(email))
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(idClaim))
+            {
                 return RedirectToPage("/Auth/Login");
+            }
 
-            CurrentUser = _userAccess.GetUserByEmail(email);
+            int userId = int.Parse(idClaim);
+            CurrentUser = _userAccess.GetUserById(userId);
+
+            if (CurrentUser == null)
+            {
+                // user deleted or corrupted cookie
+                return RedirectToPage("/Auth/Login");
+            }
+
             return Page();
         }
     }

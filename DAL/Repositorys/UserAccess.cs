@@ -22,6 +22,32 @@ namespace DAL.Repositorys
             _roleMapper = roleMapper;
         }
 
+        public UserDto? GetUserById(int id)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+                SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id
+                FROM [User] u
+                WHERE u.Id = @Id", conn);
+
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+                return null;
+
+            return new UserDto
+            {
+                Id = reader.GetInt32(0),
+                Name = reader.GetString(1),
+                Email = reader.GetString(2),
+                PasswordHash = reader.GetString(3),
+                Role = _roleMapper.FromId(reader.GetInt32(4))
+            };
+        }
+
         public UserDto? GetUserByEmail(string email)
         {
             using var conn = new SqlConnection(_connectionString);
@@ -103,11 +129,11 @@ namespace DAL.Repositorys
             var users = new List<UserDto>();
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
+
             var cmd = new SqlCommand(@"
-                SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id, r.Name AS RoleName
-                FROM [User] u
-                JOIN [User_Role] r ON u.Role_Id = r.Id
-                WHERE u.Email=@Email", conn);
+                SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id
+                FROM [User] u", conn);
+
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
@@ -122,5 +148,35 @@ namespace DAL.Repositorys
             }
             return users;
         }
+
+
+        public List<UserDto> GetAllStudents()
+        {
+            var students = new List<UserDto>();
+
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+        SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id
+        FROM [User] u
+        WHERE u.Role_Id = 1", conn); // 1 = Student
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                students.Add(new UserDto
+                {
+                    Id = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    Email = reader.GetString(2),
+                    PasswordHash = reader.GetString(3),
+                    Role = _roleMapper.FromId(reader.GetInt32(4))
+                });
+            }
+
+            return students;
+        }
+
     }
 }

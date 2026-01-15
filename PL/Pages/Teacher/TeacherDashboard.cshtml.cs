@@ -23,11 +23,13 @@ namespace PL.Pages.Teacher
 
         public IActionResult OnGet()
         {
-            var email = User.FindFirstValue(ClaimTypes.Name);
-            if (string.IsNullOrEmpty(email))
+            var idClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(idClaim))
                 return RedirectToPage("/Auth/Login");
 
-            CurrentUser = _userAccess.GetUserByEmail(email);
+            var userId = int.Parse(idClaim);
+
+            CurrentUser = _userAccess.GetUserById(userId);
             return Page();
         }
     }

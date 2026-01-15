@@ -1,8 +1,12 @@
+using Contracts.DTOs;
 using Contracts.Enums;
 using Contracts.Interfaces;
+using DAL.Models;
+using DAL.Repositorys;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Security.Claims;
 
 namespace PL.Pages.Teacher
 {
@@ -10,11 +14,18 @@ namespace PL.Pages.Teacher
     public class CreateQuizModel : PageModel
     {
         private readonly IQuizService _quizService;
+        private readonly IUserService _userService;
 
-        public CreateQuizModel(IQuizService quizService)
+        public CreateQuizModel(IQuizService quizService, IUserService userService)
         {
             _quizService = quizService;
+            _userService = userService;
         }
+
+        public List<UserDto> Students { get; set; } = new();
+
+        [BindProperty]
+        public List<int> SelectedStudentIds { get; set; } = new();
 
         [BindProperty]
         public string QuizTitle { get; set; } = string.Empty;
@@ -27,6 +38,7 @@ namespace PL.Pages.Teacher
 
         public void OnGet()
         {
+            Students = _userService.GetAllStudents();
         }
 
         public IActionResult OnPost()
@@ -62,17 +74,26 @@ namespace PL.Pages.Teacher
                 }
             }
 
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
+            Students = _userService.GetAllStudents();
 
-            // VisibilityId: 1 = Public (you can wire UI later)
-            _quizService.CreateQuiz(
-                QuizTitle,
-                visibilityId: 1,
-                questions: Questions
-            );
+            if (!ModelState.IsValid)
+                return Page();
+
+            var teacherIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(teacherIdClaim))
+                return RedirectToPage("/Auth/Login");
+
+            var teacherId = int.Parse(teacherIdClaim);
+
+            var request = new CreateQuizRequestDTO
+            {
+                Title = QuizTitle,
+                VisibilityId = 1, // Public for now
+                Questions = Questions,
+                AssignedStudentIds = SelectedStudentIds
+            };
+
+            _quizService.CreateQuiz(teacherId, request);
 
             TempData["Message"] = "Quiz successfully created.";
             return RedirectToPage("/Teacher/TeacherDashboard");
