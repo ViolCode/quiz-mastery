@@ -59,10 +59,20 @@ namespace BLL.Services
             => _quizAccess.GetQuizForStudent(assignmentId, studentId);
 
         public int StartQuiz(int studentId, int assignmentId)
-            => _quizAccess.GetOrCreateAttempt(studentId, assignmentId);
+        {
+            if (_quizAccess.IsQuizAlreadySubmitted(studentId, assignmentId))
+                throw new InvalidOperationException("Quiz already submitted.");
+
+            return _quizAccess.GetOrCreateAttempt(studentId, assignmentId);
+        }
 
         public void SaveAnswer(int attemptId, int questionId, int answerId)
-            => _quizAccess.SaveStudentAnswer(attemptId, questionId, answerId);
+        {
+            if (_quizAccess.AttemptIsSubmitted(attemptId))
+                throw new InvalidOperationException("Quiz already submitted.");
+
+            _quizAccess.SaveStudentAnswer(attemptId, questionId, answerId);
+        }
 
         public void SubmitQuiz(int attemptId)
             => _quizAccess.SubmitAttempt(attemptId);

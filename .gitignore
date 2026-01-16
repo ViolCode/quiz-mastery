@@ -5,6 +5,9 @@ obj/
 # LibMan library files
 PL/wwwroot/lib
 
+# Luna server deployment
+PL/Properties/PublishProfiles/
+
 # User-specific files
 *.user
 *.suo

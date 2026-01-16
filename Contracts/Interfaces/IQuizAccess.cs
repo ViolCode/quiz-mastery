@@ -17,5 +17,6 @@ namespace Contracts.Interfaces
         void SaveStudentAnswer(int attemptId, int questionId, int answerId);
         void SubmitAttempt(int attemptId);
         bool IsQuizAlreadySubmitted(int studentId, int assignmentId);
+        bool AttemptIsSubmitted(int attemptId);
     }
 }
