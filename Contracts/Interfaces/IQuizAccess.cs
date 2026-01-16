@@ -15,7 +15,12 @@ namespace Contracts.Interfaces
         int CreateAnswer(int questionId, string answerText, bool isCorrect);
 
         void UpdateQuestionCorrectAnswer(int questionId, int correctAnswerId);
-        List<QuizDto> GetQuizzesAssignedToStudent(int studentId);
+        List<StudentAssignmentQuizDto> GetAssignmentsForStudent(int studentId);
         List<QuizDto> GetQuizzesCreatedByTeacher(int teacherId);
+        StudentTakeQuizDto? GetQuizForStudent(int assignmentId, int studentId);
+        int GetOrCreateAttempt(int studentId, int assignmentId);
+        void SaveStudentAnswer(int attemptId, int questionId, int answerId);
+        void SubmitAttempt(int attemptId);
+        bool IsQuizAlreadySubmitted(int studentId, int assignmentId);
     }
 }

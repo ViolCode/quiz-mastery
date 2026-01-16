@@ -21,11 +21,11 @@ namespace DAL.Repositorys
                 INSERT INTO [quiz] (title, visibility_id, created_at)
                 OUTPUT INSERTED.id
                 VALUES (@Title, @VisibilityId, @CreatedAt)", conn);
-            
+
             cmd.Parameters.AddWithValue("@Title", quiz.Title);
             cmd.Parameters.AddWithValue("@VisibilityId", quiz.VisibilityId);
             cmd.Parameters.AddWithValue("@CreatedAt", quiz.CreatedAt);
-            
+
             var quizId = (int)cmd.ExecuteScalar();
             return quizId;
         }
@@ -38,11 +38,11 @@ namespace DAL.Repositorys
                 INSERT INTO [question] (quiz_id, text, question_type_id, correct_answer_id)
                 OUTPUT INSERTED.id
                 VALUES (@QuizId, @Text, @QuestionTypeId, NULL)", conn);
-            
+
             cmd.Parameters.AddWithValue("@QuizId", quizId);
             cmd.Parameters.AddWithValue("@Text", questionText);
             cmd.Parameters.AddWithValue("@QuestionTypeId", questionTypeId);
-            
+
             var questionId = (int)cmd.ExecuteScalar();
             return questionId;
         }
@@ -55,11 +55,11 @@ namespace DAL.Repositorys
                 INSERT INTO [answer] (question_id, text, is_correct, student_assignment_id)
                 OUTPUT INSERTED.id
                 VALUES (@QuestionId, @Text, @IsCorrect, NULL)", conn);
-            
+
             cmd.Parameters.AddWithValue("@QuestionId", questionId);
             cmd.Parameters.AddWithValue("@Text", answerText);
             cmd.Parameters.AddWithValue("@IsCorrect", isCorrect);
-            
+
             var answerId = (int)cmd.ExecuteScalar();
             return answerId;
         }
@@ -103,50 +103,49 @@ namespace DAL.Repositorys
                 UPDATE [question]
                 SET correct_answer_id = @CorrectAnswerId
                 WHERE id = @QuestionId", conn);
-            
+
             cmd.Parameters.AddWithValue("@QuestionId", questionId);
             cmd.Parameters.AddWithValue("@CorrectAnswerId", correctAnswerId);
-            
+
             cmd.ExecuteNonQuery();
         }
 
-        public List<QuizDto> GetQuizzesAssignedToStudent(int studentId)
+        public List<StudentAssignmentQuizDto> GetAssignmentsForStudent(int studentId)
         {
-            var quizzes = new List<QuizDto>();
+            var result = new List<StudentAssignmentQuizDto>();
 
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
             var cmd = new SqlCommand(@"
-                SELECT DISTINCT
-                    q.id,
+                SELECT
+                    ta.id AS assignment_id,
+                    q.id AS quiz_id,
                     q.title,
-                    q.visibility_id,
-                    q.created_at
-                FROM quiz q
-                JOIN teacher_assignment ta ON ta.quiz_id = q.id
-                JOIN student_assignment sa ON sa.assignment_id = ta.id
+                    sa.assigned_at
+                FROM student_assignment sa
+                JOIN teacher_assignment ta ON ta.id = sa.assignment_id
+                JOIN quiz q ON q.id = ta.quiz_id
                 WHERE sa.student_id = @StudentId
-                ORDER BY q.created_at DESC", conn);
+                ORDER BY sa.assigned_at DESC", conn);
 
             cmd.Parameters.AddWithValue("@StudentId", studentId);
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                quizzes.Add(new QuizDto
+                result.Add(new StudentAssignmentQuizDto
                 {
-                    Id = reader.GetInt32(0),
-                    Title = reader.GetString(1),
-                    VisibilityId = reader.GetInt32(2),
-                    CreatedAt = reader.GetDateTime(3)
+                    AssignmentId = reader.GetInt32(0),
+                    QuizId = reader.GetInt32(1),
+                    Title = reader.GetString(2),
+                    AssignedAt = reader.GetDateTime(3)
                 });
             }
 
-            return quizzes;
+            return result;
         }
-
-        public List<QuizDto> GetQuizzesCreatedByTeacher(int teacherId)
+         public List<QuizDto> GetQuizzesCreatedByTeacher(int teacherId)
         {
             var quizzes = new List<QuizDto>();
 
@@ -175,6 +174,178 @@ namespace DAL.Repositorys
             }
 
             return quizzes;
+        }
+
+        public StudentTakeQuizDto? GetQuizForStudent(int assignmentId, int studentId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            // Ensure quiz belongs to student
+            var quizCmd = new SqlCommand(@"
+                SELECT q.id, q.title
+                FROM student_assignment sa
+                JOIN teacher_assignment ta ON ta.id = sa.assignment_id
+                JOIN quiz q ON q.id = ta.quiz_id
+                WHERE sa.student_id = @StudentId
+                  AND sa.assignment_id = @AssignmentId", conn);
+
+            quizCmd.Parameters.AddWithValue("@StudentId", studentId);
+            quizCmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
+
+            using var reader = quizCmd.ExecuteReader();
+            if (!reader.Read())
+                //throw new UnauthorizedAccessException();
+                return null;
+
+            var quiz = new StudentTakeQuizDto
+            {
+                AssignmentId = assignmentId,
+                Title = reader.GetString(1)
+            };
+
+            reader.Close();
+
+            // Load questions & answers
+            var cmd = new SqlCommand(@"
+                SELECT q.id, q.text, a.id, a.text
+                FROM question q
+                JOIN answer a ON a.question_id = q.id
+                WHERE q.quiz_id = (
+                    SELECT quiz_id
+                    FROM teacher_assignment
+                    WHERE id = @AssignmentId)", conn);
+
+            cmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
+
+            using var qReader = cmd.ExecuteReader();
+            var map = new Dictionary<int, StudentTakeQuestionDto>();
+
+            while (qReader.Read())
+            {
+                int qId = qReader.GetInt32(0);
+
+                if (!map.ContainsKey(qId))
+                {
+                    map[qId] = new StudentTakeQuestionDto
+                    {
+                        QuestionId = qId,
+                        Text = qReader.GetString(1)
+                    };
+                }
+
+                map[qId].Answers.Add(new StudentTakeAnswerDto
+                {
+                    AnswerId = qReader.GetInt32(2),
+                    Text = qReader.GetString(3)
+                });
+            }
+
+            quiz.Questions = map.Values.ToList();
+            return quiz;
+        }
+
+        public int GetOrCreateAttempt(int studentId, int assignmentId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+                IF EXISTS (
+                    SELECT 1
+                    FROM dbo.student_quiz_attempt
+                    WHERE student_id = @StudentId
+                      AND assignment_id = @AssignmentId
+                      AND submitted_at IS NULL
+                )
+                BEGIN
+                    SELECT id
+                    FROM dbo.student_quiz_attempt
+                    WHERE student_id = @StudentId
+                      AND assignment_id = @AssignmentId
+                      AND submitted_at IS NULL;
+                END
+                ELSE
+                BEGIN
+                    INSERT INTO dbo.student_quiz_attempt (student_id, assignment_id)
+                    VALUES (@StudentId, @AssignmentId);
+
+                    SELECT SCOPE_IDENTITY();
+                END", conn);
+
+            cmd.Parameters.AddWithValue("@StudentId", studentId);
+            cmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
+
+            return Convert.ToInt32(cmd.ExecuteScalar());
+        }
+
+
+        public bool IsQuizAlreadySubmitted(int studentId, int assignmentId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+                SELECT 1
+                FROM dbo.student_quiz_attempt
+                WHERE student_id = @StudentId
+                  AND assignment_id = @AssignmentId
+                  AND submitted_at IS NOT NULL", conn);
+
+            cmd.Parameters.AddWithValue("@StudentId", studentId);
+            cmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
+
+            return cmd.ExecuteScalar() != null;
+        }
+
+        public void SaveStudentAnswer(int attemptId, int questionId, int answerId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+                MERGE student_answer AS target
+                USING (SELECT @AttemptId, @QuestionId) AS source (attempt_id, question_id)
+                ON target.attempt_id = source.attempt_id
+                   AND target.question_id = source.question_id
+                WHEN MATCHED THEN
+                    UPDATE SET answer_id = @AnswerId
+                WHEN NOT MATCHED THEN
+                    INSERT (attempt_id, question_id, answer_id)
+                    VALUES (@AttemptId, @QuestionId, @AnswerId);", conn);
+
+            cmd.Parameters.AddWithValue("@AttemptId", attemptId);
+            cmd.Parameters.AddWithValue("@QuestionId", questionId);
+            cmd.Parameters.AddWithValue("@AnswerId", answerId);
+
+            cmd.ExecuteNonQuery();
+        }
+
+        public void SubmitAttempt(int attemptId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var scoreCmd = new SqlCommand(@"
+                SELECT COUNT(*)
+                FROM student_answer sa
+                JOIN answer a ON a.id = sa.answer_id
+                WHERE sa.attempt_id = @AttemptId
+                  AND a.is_correct = 1", conn);
+
+            scoreCmd.Parameters.AddWithValue("@AttemptId", attemptId);
+            int score = (int)scoreCmd.ExecuteScalar();
+
+            var update = new SqlCommand(@"
+                UPDATE student_quiz_attempt
+                SET submitted_at = SYSUTCDATETIME(),
+                    score = @Score
+                WHERE id = @AttemptId", conn);
+
+            update.Parameters.AddWithValue("@Score", score);
+            update.Parameters.AddWithValue("@AttemptId", attemptId);
+
+            update.ExecuteNonQuery();
         }
     }
 }

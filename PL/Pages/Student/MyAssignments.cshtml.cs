@@ -18,7 +18,7 @@ namespace PL.Pages.Student
             _quizService = quizService;
         }
 
-        public List<QuizDto> Quizzes { get; set; } = new();
+        public List<StudentAssignmentQuizDto> Assignments { get; set; } = new();
 
         public IActionResult OnGet()
         {
@@ -27,7 +27,7 @@ namespace PL.Pages.Student
                 return RedirectToPage("/Auth/Login");
 
             int studentId = int.Parse(idClaim);
-            Quizzes = _quizService.GetQuizzesForStudent(studentId);
+            Assignments = _quizService.GetAssignmentsForStudent(studentId);
 
             return Page();
         }
