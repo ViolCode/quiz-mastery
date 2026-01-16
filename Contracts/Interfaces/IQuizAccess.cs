@@ -15,8 +15,9 @@ namespace Contracts.Interfaces
         StudentTakeQuizDto? GetQuizForStudent(int assignmentId, int studentId);
         int GetOrCreateAttempt(int studentId, int assignmentId);
         void SaveStudentAnswer(int attemptId, int questionId, int answerId);
-        void SubmitAttempt(int attemptId);
+        void SubmitAttempt(int attemptId, int score);
         bool IsQuizAlreadySubmitted(int studentId, int assignmentId);
         bool AttemptIsSubmitted(int attemptId);
+        int CalculateScore(int attemptId);
     }
 }

@@ -18,6 +18,8 @@ namespace PL.Pages.Student
         [BindProperty] public List<int> QuestionIds { get; set; } = new();
         [BindProperty] public List<int> Answers { get; set; } = new();
         [BindProperty] public int AttemptId { get; set; }
+        [BindProperty] public int AssignmentId { get; set; }
+
 
         public TakeQuizModel(IQuizService quizService)
         {
@@ -28,17 +30,21 @@ namespace PL.Pages.Student
         {
             int studentId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            if (_quizService.IsQuizAlreadySubmitted(studentId, assignmentId))
+            try
             {
-                TempData["Message"] = "You have already submitted this quiz.";
+                Quiz = _quizService.GetQuizForStudent(assignmentId, studentId);
+                if (Quiz == null)
+                    return Forbid();
+
+                AttemptId = _quizService.StartQuiz(studentId, assignmentId);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData[$"Message_{assignmentId}"] = ex.Message;
                 return RedirectToPage("/Student/MyAssignments");
             }
 
-            Quiz = _quizService.GetQuizForStudent(assignmentId, studentId);
-            if (Quiz == null)
-                return Forbid();
 
-            AttemptId = _quizService.StartQuiz(assignmentId, studentId);
             return Page();
         }
 
@@ -50,12 +56,20 @@ namespace PL.Pages.Student
                 return Page();
             }
 
-            for (int i = 0; i < QuestionIds.Count; i++)
+            try
             {
-                _quizService.SaveAnswer(AttemptId, QuestionIds[i], Answers[i]);
-            }
+                for (int i = 0; i < QuestionIds.Count; i++)
+                {
+                    _quizService.SaveAnswer(AttemptId, QuestionIds[i], Answers[i]);
+                }
 
-            _quizService.SubmitQuiz(AttemptId);
+                _quizService.SubmitQuiz(AttemptId);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData[$"Message_{AssignmentId}"] = ex.Message;
+                return RedirectToPage("/Student/MyAssignments");
+            }
 
             return RedirectToPage("/Student/MyAssignments");
         }

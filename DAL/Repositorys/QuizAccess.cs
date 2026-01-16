@@ -280,50 +280,6 @@ namespace DAL.Repositorys
             return cmd.ExecuteScalar() != null;
         }
 
-        //public void SaveStudentAnswer(int attemptId, int questionId, int answerId)
-        //{
-        //    using var conn = new SqlConnection(_connectionString);
-        //    conn.Open();
-
-        //    // Get assignmentId for this attempt
-        //    var assignmentCmd = new SqlCommand(@"
-        //        SELECT assignment_id 
-        //        FROM student_quiz_attempt 
-        //        WHERE id = @AttemptId", conn);
-
-        //    assignmentCmd.Parameters.AddWithValue("@AttemptId", attemptId);
-        //    int assignmentId = (int)assignmentCmd.ExecuteScalar();
-
-        //    // Check if quiz is already submitted
-        //    var lockCmd = new SqlCommand(@"
-        //        SELECT 1 
-        //        FROM student_quiz_attempt 
-        //        WHERE id = @AttemptId AND submitted_at IS NOT NULL", conn);
-
-        //    lockCmd.Parameters.AddWithValue("@AttemptId", attemptId);
-        //    if (lockCmd.ExecuteScalar() != null) return;
-
-        //    // Clear previous answer
-        //    var clearCmd = new SqlCommand(@"
-        //        UPDATE answer
-        //        SET student_assignment_id = NULL
-        //        WHERE question_id = @QuestionId AND student_assignment_id = @AssignmentId", conn);
-
-        //    clearCmd.Parameters.AddWithValue("@QuestionId", questionId);
-        //    clearCmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
-        //    clearCmd.ExecuteNonQuery();
-
-        //    // Save new answer
-        //    var selectCmd = new SqlCommand(@"
-        //        UPDATE answer
-        //        SET student_assignment_id = @AssignmentId
-        //        WHERE id = @AnswerId", conn);
-
-        //    selectCmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
-        //    selectCmd.Parameters.AddWithValue("@AnswerId", answerId);
-        //    selectCmd.ExecuteNonQuery();
-        //}
-
         public void SaveStudentAnswer(int attemptId, int questionId, int answerId)
         {
             using var conn = new SqlConnection(_connectionString);
@@ -349,31 +305,21 @@ namespace DAL.Repositorys
             insertCmd.ExecuteNonQuery();
         }
 
-        public void SubmitAttempt(int attemptId)
+        public void SubmitAttempt(int attemptId, int score)
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
-            // Calculate score
-            var scoreCmd = new SqlCommand(@"
-                SELECT COUNT(*)
-                FROM student_answer sa
-                JOIN answer a ON a.id = sa.answer_id
-                WHERE sa.attempt_id = @AttemptId
-                  AND a.is_correct = 1", conn);
+            var cmd = new SqlCommand(@"
+        UPDATE student_quiz_attempt
+        SET submitted_at = SYSUTCDATETIME(),
+            score = @Score
+        WHERE id = @AttemptId", conn);
 
-            scoreCmd.Parameters.AddWithValue("@AttemptId", attemptId);
-            int score = (int)scoreCmd.ExecuteScalar();
+            cmd.Parameters.AddWithValue("@Score", score);
+            cmd.Parameters.AddWithValue("@AttemptId", attemptId);
 
-            // Update attempt
-            var update = new SqlCommand(@"
-                UPDATE student_quiz_attempt
-                SET submitted_at = SYSUTCDATETIME(), score = @Score
-                WHERE id = @AttemptId", conn);
-
-            update.Parameters.AddWithValue("@Score", score);
-            update.Parameters.AddWithValue("@AttemptId", attemptId);
-            update.ExecuteNonQuery();
+            cmd.ExecuteNonQuery();
         }
 
         public bool AttemptIsSubmitted(int attemptId)
@@ -390,6 +336,23 @@ namespace DAL.Repositorys
             cmd.Parameters.AddWithValue("@AttemptId", attemptId);
 
             return cmd.ExecuteScalar() != null;
+        }
+
+        public int CalculateScore(int attemptId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            conn.Open();
+
+            var cmd = new SqlCommand(@"
+                SELECT COUNT(*)
+                FROM student_answer sa
+                JOIN answer a ON a.id = sa.answer_id
+                WHERE sa.attempt_id = @AttemptId
+                  AND a.is_correct = 1", conn);
+
+            cmd.Parameters.AddWithValue("@AttemptId", attemptId);
+
+            return (int)cmd.ExecuteScalar();
         }
 
     }

@@ -27,6 +27,14 @@ else
                             Assigned on @assignment.AssignedAt.ToLocalTime().ToShortDateString()
                         </p>
 
+                        @* Here you currently check TempData *@
+                        @if (TempData[$"Message_{assignment.AssignmentId}"] != null)
+                        {
+                            <div class="alert alert-warning">
+                                @TempData[$"Message_{assignment.AssignmentId}"]
+                            </div>
+                        }
+
                         <a asp-page="/Student/TakeQuiz"
                            asp-route-assignmentId="@assignment.AssignmentId"
                            class="btn btn-primary btn-sm">

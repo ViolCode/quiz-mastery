@@ -75,7 +75,13 @@ namespace BLL.Services
         }
 
         public void SubmitQuiz(int attemptId)
-            => _quizAccess.SubmitAttempt(attemptId);
+        {
+            if (_quizAccess.AttemptIsSubmitted(attemptId))
+                throw new InvalidOperationException("Quiz already submitted.");
+
+            int score = _quizAccess.CalculateScore(attemptId);
+            _quizAccess.SubmitAttempt(attemptId, score);
+        }
 
         public bool IsQuizAlreadySubmitted(int studentId, int assignmentId)
             => _quizAccess.IsQuizAlreadySubmitted(studentId, assignmentId);
