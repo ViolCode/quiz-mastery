@@ -31,9 +31,9 @@ namespace PL.Pages.Teacher
         public string QuizTitle { get; set; } = string.Empty;
 
         [BindProperty]
-        public List<CreateQuizQuestionModel> Questions { get; set; } = new()
+        public List<CreateQuizQuestionDTO> Questions { get; set; } = new()
         {
-            new CreateQuizQuestionModel()
+            new CreateQuizQuestionDTO()
         };
 
         public void OnGet()

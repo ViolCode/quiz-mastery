@@ -17,6 +17,7 @@ namespace DAL.Repositorys
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
+
             var cmd = new SqlCommand(@"
                 INSERT INTO [quiz] (title, visibility_id, created_at)
                 OUTPUT INSERTED.id
@@ -26,14 +27,14 @@ namespace DAL.Repositorys
             cmd.Parameters.AddWithValue("@VisibilityId", quiz.VisibilityId);
             cmd.Parameters.AddWithValue("@CreatedAt", quiz.CreatedAt);
 
-            var quizId = (int)cmd.ExecuteScalar();
-            return quizId;
+            return (int)cmd.ExecuteScalar();
         }
 
         public int CreateQuestion(int quizId, string questionText, int questionTypeId)
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
+
             var cmd = new SqlCommand(@"
                 INSERT INTO [question] (quiz_id, text, question_type_id, correct_answer_id)
                 OUTPUT INSERTED.id
@@ -43,14 +44,14 @@ namespace DAL.Repositorys
             cmd.Parameters.AddWithValue("@Text", questionText);
             cmd.Parameters.AddWithValue("@QuestionTypeId", questionTypeId);
 
-            var questionId = (int)cmd.ExecuteScalar();
-            return questionId;
+            return (int)cmd.ExecuteScalar();
         }
 
         public int CreateAnswer(int questionId, string answerText, bool isCorrect)
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
+
             var cmd = new SqlCommand(@"
                 INSERT INTO [answer] (question_id, text, is_correct, student_assignment_id)
                 OUTPUT INSERTED.id
@@ -60,8 +61,7 @@ namespace DAL.Repositorys
             cmd.Parameters.AddWithValue("@Text", answerText);
             cmd.Parameters.AddWithValue("@IsCorrect", isCorrect);
 
-            var answerId = (int)cmd.ExecuteScalar();
-            return answerId;
+            return (int)cmd.ExecuteScalar();
         }
 
         public int CreateTeacherAssignment(int teacherId, int quizId)
@@ -99,6 +99,7 @@ namespace DAL.Repositorys
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
+
             var cmd = new SqlCommand(@"
                 UPDATE [question]
                 SET correct_answer_id = @CorrectAnswerId
@@ -113,16 +114,11 @@ namespace DAL.Repositorys
         public List<StudentAssignmentQuizDto> GetAssignmentsForStudent(int studentId)
         {
             var result = new List<StudentAssignmentQuizDto>();
-
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
             var cmd = new SqlCommand(@"
-                SELECT
-                    ta.id AS assignment_id,
-                    q.id AS quiz_id,
-                    q.title,
-                    sa.assigned_at
+                SELECT ta.id AS assignment_id, q.id AS quiz_id, q.title, sa.assigned_at
                 FROM student_assignment sa
                 JOIN teacher_assignment ta ON ta.id = sa.assignment_id
                 JOIN quiz q ON q.id = ta.quiz_id
@@ -145,10 +141,10 @@ namespace DAL.Repositorys
 
             return result;
         }
-         public List<QuizDto> GetQuizzesCreatedByTeacher(int teacherId)
+
+        public List<QuizDto> GetQuizzesCreatedByTeacher(int teacherId)
         {
             var quizzes = new List<QuizDto>();
-
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
@@ -187,15 +183,13 @@ namespace DAL.Repositorys
                 FROM student_assignment sa
                 JOIN teacher_assignment ta ON ta.id = sa.assignment_id
                 JOIN quiz q ON q.id = ta.quiz_id
-                WHERE sa.student_id = @StudentId
-                  AND sa.assignment_id = @AssignmentId", conn);
+                WHERE sa.student_id = @StudentId AND sa.assignment_id = @AssignmentId", conn);
 
             quizCmd.Parameters.AddWithValue("@StudentId", studentId);
             quizCmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
 
             using var reader = quizCmd.ExecuteReader();
             if (!reader.Read())
-                //throw new UnauthorizedAccessException();
                 return null;
 
             var quiz = new StudentTakeQuizDto
@@ -203,18 +197,14 @@ namespace DAL.Repositorys
                 AssignmentId = assignmentId,
                 Title = reader.GetString(1)
             };
-
             reader.Close();
 
-            // Load questions & answers
+            // Load questions and answers
             var cmd = new SqlCommand(@"
                 SELECT q.id, q.text, a.id, a.text
                 FROM question q
                 JOIN answer a ON a.question_id = q.id
-                WHERE q.quiz_id = (
-                    SELECT quiz_id
-                    FROM teacher_assignment
-                    WHERE id = @AssignmentId)", conn);
+                WHERE q.quiz_id = (SELECT quiz_id FROM teacher_assignment WHERE id = @AssignmentId)", conn);
 
             cmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
 
@@ -224,7 +214,6 @@ namespace DAL.Repositorys
             while (qReader.Read())
             {
                 int qId = qReader.GetInt32(0);
-
                 if (!map.ContainsKey(qId))
                 {
                     map[qId] = new StudentTakeQuestionDto
@@ -252,24 +241,17 @@ namespace DAL.Repositorys
 
             var cmd = new SqlCommand(@"
                 IF EXISTS (
-                    SELECT 1
-                    FROM dbo.student_quiz_attempt
-                    WHERE student_id = @StudentId
-                      AND assignment_id = @AssignmentId
-                      AND submitted_at IS NULL
+                    SELECT 1 FROM dbo.student_quiz_attempt 
+                    WHERE student_id = @StudentId AND assignment_id = @AssignmentId AND submitted_at IS NULL
                 )
                 BEGIN
-                    SELECT id
-                    FROM dbo.student_quiz_attempt
-                    WHERE student_id = @StudentId
-                      AND assignment_id = @AssignmentId
-                      AND submitted_at IS NULL;
+                    SELECT id FROM dbo.student_quiz_attempt 
+                    WHERE student_id = @StudentId AND assignment_id = @AssignmentId AND submitted_at IS NULL;
                 END
                 ELSE
                 BEGIN
                     INSERT INTO dbo.student_quiz_attempt (student_id, assignment_id)
                     VALUES (@StudentId, @AssignmentId);
-
                     SELECT SCOPE_IDENTITY();
                 END", conn);
 
@@ -279,18 +261,15 @@ namespace DAL.Repositorys
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
-
         public bool IsQuizAlreadySubmitted(int studentId, int assignmentId)
         {
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
             var cmd = new SqlCommand(@"
-                SELECT 1
-                FROM dbo.student_quiz_attempt
-                WHERE student_id = @StudentId
-                  AND assignment_id = @AssignmentId
-                  AND submitted_at IS NOT NULL", conn);
+                SELECT 1 
+                FROM dbo.student_quiz_attempt 
+                WHERE student_id = @StudentId AND assignment_id = @AssignmentId AND submitted_at IS NOT NULL", conn);
 
             cmd.Parameters.AddWithValue("@StudentId", studentId);
             cmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
@@ -303,22 +282,43 @@ namespace DAL.Repositorys
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
-            var cmd = new SqlCommand(@"
-                MERGE student_answer AS target
-                USING (SELECT @AttemptId, @QuestionId) AS source (attempt_id, question_id)
-                ON target.attempt_id = source.attempt_id
-                   AND target.question_id = source.question_id
-                WHEN MATCHED THEN
-                    UPDATE SET answer_id = @AnswerId
-                WHEN NOT MATCHED THEN
-                    INSERT (attempt_id, question_id, answer_id)
-                    VALUES (@AttemptId, @QuestionId, @AnswerId);", conn);
+            // Get assignmentId for this attempt
+            var assignmentCmd = new SqlCommand(@"
+                SELECT assignment_id 
+                FROM student_quiz_attempt 
+                WHERE id = @AttemptId", conn);
 
-            cmd.Parameters.AddWithValue("@AttemptId", attemptId);
-            cmd.Parameters.AddWithValue("@QuestionId", questionId);
-            cmd.Parameters.AddWithValue("@AnswerId", answerId);
+            assignmentCmd.Parameters.AddWithValue("@AttemptId", attemptId);
+            int assignmentId = (int)assignmentCmd.ExecuteScalar();
 
-            cmd.ExecuteNonQuery();
+            // Check if quiz is already submitted
+            var lockCmd = new SqlCommand(@"
+                SELECT 1 
+                FROM student_quiz_attempt 
+                WHERE id = @AttemptId AND submitted_at IS NOT NULL", conn);
+
+            lockCmd.Parameters.AddWithValue("@AttemptId", attemptId);
+            if (lockCmd.ExecuteScalar() != null) return;
+
+            // Clear previous answer
+            var clearCmd = new SqlCommand(@"
+                UPDATE answer
+                SET student_assignment_id = NULL
+                WHERE question_id = @QuestionId AND student_assignment_id = @AssignmentId", conn);
+
+            clearCmd.Parameters.AddWithValue("@QuestionId", questionId);
+            clearCmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
+            clearCmd.ExecuteNonQuery();
+
+            // Save new answer
+            var selectCmd = new SqlCommand(@"
+                UPDATE answer
+                SET student_assignment_id = @AssignmentId
+                WHERE id = @AnswerId", conn);
+
+            selectCmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
+            selectCmd.Parameters.AddWithValue("@AnswerId", answerId);
+            selectCmd.ExecuteNonQuery();
         }
 
         public void SubmitAttempt(int attemptId)
@@ -326,25 +326,32 @@ namespace DAL.Repositorys
             using var conn = new SqlConnection(_connectionString);
             conn.Open();
 
-            var scoreCmd = new SqlCommand(@"
-                SELECT COUNT(*)
-                FROM student_answer sa
-                JOIN answer a ON a.id = sa.answer_id
-                WHERE sa.attempt_id = @AttemptId
-                  AND a.is_correct = 1", conn);
+            // Get assignmentId
+            var assignmentCmd = new SqlCommand(@"
+                SELECT assignment_id 
+                FROM student_quiz_attempt 
+                WHERE id = @AttemptId", conn);
 
-            scoreCmd.Parameters.AddWithValue("@AttemptId", attemptId);
+            assignmentCmd.Parameters.AddWithValue("@AttemptId", attemptId);
+            int assignmentId = (int)assignmentCmd.ExecuteScalar();
+
+            // Calculate score
+            var scoreCmd = new SqlCommand(@"
+                SELECT COUNT(*) 
+                FROM answer
+                WHERE student_assignment_id = @AssignmentId AND is_correct = 1", conn);
+
+            scoreCmd.Parameters.AddWithValue("@AssignmentId", assignmentId);
             int score = (int)scoreCmd.ExecuteScalar();
 
+            // Update attempt
             var update = new SqlCommand(@"
                 UPDATE student_quiz_attempt
-                SET submitted_at = SYSUTCDATETIME(),
-                    score = @Score
+                SET submitted_at = SYSUTCDATETIME(), score = @Score
                 WHERE id = @AttemptId", conn);
 
             update.Parameters.AddWithValue("@Score", score);
             update.Parameters.AddWithValue("@AttemptId", attemptId);
-
             update.ExecuteNonQuery();
         }
     }

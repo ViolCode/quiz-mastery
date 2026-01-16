@@ -22,37 +22,25 @@ namespace BLL.Services
             };
 
             int quizId = _quizAccess.CreateQuiz(quiz);
-
             int assignmentId = _quizAccess.CreateTeacherAssignment(teacherId, quizId);
 
             foreach (var question in request.Questions)
             {
-                int questionId = _quizAccess.CreateQuestion(
-                    quizId,
-                    question.QuestionText,
-                    questionTypeId: 1 // SingleChoice
-                );
+                int questionId = _quizAccess.CreateQuestion(quizId, question.QuestionText, questionTypeId: 1);
 
                 int? correctAnswerId = null;
-
                 for (int i = 0; i < question.Options.Count; i++)
                 {
                     var optionText = question.Options[i];
-                    if (string.IsNullOrWhiteSpace(optionText))
-                        continue;
+                    if (string.IsNullOrWhiteSpace(optionText)) continue;
 
                     bool isCorrect = question.CorrectOptionIndex == i;
-
                     int answerId = _quizAccess.CreateAnswer(questionId, optionText, isCorrect);
-
-                    if (isCorrect)
-                        correctAnswerId = answerId;
+                    if (isCorrect) correctAnswerId = answerId;
                 }
 
                 if (correctAnswerId.HasValue)
-                {
                     _quizAccess.UpdateQuestionCorrectAnswer(questionId, correctAnswerId.Value);
-                }
             }
 
             foreach (var studentId in request.AssignedStudentIds)
@@ -62,37 +50,24 @@ namespace BLL.Services
         }
 
         public List<StudentAssignmentQuizDto> GetAssignmentsForStudent(int studentId)
-        {
-            return _quizAccess.GetAssignmentsForStudent(studentId);
-        }
+            => _quizAccess.GetAssignmentsForStudent(studentId);
 
         public List<QuizDto> GetQuizzesForTeacher(int teacherId)
-        {
-            return _quizAccess.GetQuizzesCreatedByTeacher(teacherId);
-        }
+            => _quizAccess.GetQuizzesCreatedByTeacher(teacherId);
 
         public StudentTakeQuizDto? GetQuizForStudent(int assignmentId, int studentId)
-        {
-            return _quizAccess.GetQuizForStudent(assignmentId, studentId);
-        }
+            => _quizAccess.GetQuizForStudent(assignmentId, studentId);
 
         public int StartQuiz(int studentId, int assignmentId)
-        {
-            return _quizAccess.GetOrCreateAttempt(studentId, assignmentId);
-        }
+            => _quizAccess.GetOrCreateAttempt(studentId, assignmentId);
 
         public void SaveAnswer(int attemptId, int questionId, int answerId)
-        {
-            _quizAccess.SaveStudentAnswer(attemptId, questionId, answerId);
-        }
+            => _quizAccess.SaveStudentAnswer(attemptId, questionId, answerId);
 
         public void SubmitQuiz(int attemptId)
-        {
-            _quizAccess.SubmitAttempt(attemptId);
-        }
+            => _quizAccess.SubmitAttempt(attemptId);
+
         public bool IsQuizAlreadySubmitted(int studentId, int assignmentId)
-        {
-            return _quizAccess.IsQuizAlreadySubmitted(studentId, assignmentId);
-        }
+            => _quizAccess.IsQuizAlreadySubmitted(studentId, assignmentId);
     }
 }
