@@ -311,10 +311,10 @@ namespace DAL.Repositorys
             conn.Open();
 
             var cmd = new SqlCommand(@"
-        UPDATE student_quiz_attempt
-        SET submitted_at = SYSUTCDATETIME(),
-            score = @Score
-        WHERE id = @AttemptId", conn);
+                UPDATE student_quiz_attempt
+                SET submitted_at = SYSUTCDATETIME(),
+                    score = @Score
+                WHERE id = @AttemptId", conn);
 
             cmd.Parameters.AddWithValue("@Score", score);
             cmd.Parameters.AddWithValue("@AttemptId", attemptId);
@@ -354,6 +354,5 @@ namespace DAL.Repositorys
 
             return (int)cmd.ExecuteScalar();
         }
-
     }
 }
