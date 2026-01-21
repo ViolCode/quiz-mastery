@@ -5,28 +5,31 @@ namespace BLL.Services
 {
     public class QuizService : IQuizService
     {
-        private readonly IQuizAccess _quizAccess;
+        private readonly IQuizRepository _quizRepository;
+        private readonly IAssignmentRepository _assignmentRepository;
+        private readonly IAttemptRepository _attemptRepository;
 
-        public QuizService(IQuizAccess quizAccess)
+        public QuizService(IQuizRepository quizRepository, IAssignmentRepository assignmentRepository, IAttemptRepository attemptRepository)
         {
-            _quizAccess = quizAccess;
+            _quizRepository = quizRepository;
+            _assignmentRepository = assignmentRepository;
+            _attemptRepository = attemptRepository;
         }
 
         public void CreateQuiz(int teacherId, CreateQuizRequestDTO request)
         {
-            var quiz = new QuizDto
-            {
+            var quiz = new QuizDto{
                 Title = request.Title,
                 VisibilityId = request.VisibilityId,
                 CreatedAt = DateTime.UtcNow
             };
 
-            int quizId = _quizAccess.CreateQuiz(quiz);
-            int assignmentId = _quizAccess.CreateTeacherAssignment(teacherId, quizId);
+            int quizId = _quizRepository.CreateQuiz(quiz);
+            int assignmentId = _assignmentRepository.CreateTeacherAssignment(teacherId, quizId);
 
             foreach (var question in request.Questions)
             {
-                int questionId = _quizAccess.CreateQuestion(quizId, question.QuestionText, questionTypeId: 1);
+                int questionId = _quizRepository.CreateQuestion(quizId, question.QuestionText, 1);
 
                 int? correctAnswerId = null;
                 for (int i = 0; i < question.Options.Count; i++)
@@ -35,55 +38,57 @@ namespace BLL.Services
                     if (string.IsNullOrWhiteSpace(optionText)) continue;
 
                     bool isCorrect = question.CorrectOptionIndex == i;
-                    int answerId = _quizAccess.CreateAnswer(questionId, optionText, isCorrect);
-                    if (isCorrect) correctAnswerId = answerId;
+                    int answerId = _quizRepository.CreateAnswer(questionId, optionText, isCorrect);
+
+                    if (isCorrect)
+                        correctAnswerId = answerId;
                 }
 
                 if (correctAnswerId.HasValue)
-                    _quizAccess.UpdateQuestionCorrectAnswer(questionId, correctAnswerId.Value);
+                    _quizRepository.UpdateQuestionCorrectAnswer(questionId, correctAnswerId.Value);
             }
 
             foreach (var studentId in request.AssignedStudentIds)
             {
-                _quizAccess.AssignAssignmentToStudent(studentId, assignmentId);
+                _assignmentRepository.AssignAssignmentToStudent(studentId, assignmentId);
             }
         }
 
         public List<StudentAssignmentQuizDto> GetAssignmentsForStudent(int studentId)
-            => _quizAccess.GetAssignmentsForStudent(studentId);
+            => _assignmentRepository.GetAssignmentsForStudent(studentId);
 
         public List<QuizDto> GetQuizzesForTeacher(int teacherId)
-            => _quizAccess.GetQuizzesCreatedByTeacher(teacherId);
+            => _quizRepository.GetQuizzesCreatedByTeacher(teacherId);
 
         public StudentTakeQuizDto? GetQuizForStudent(int assignmentId, int studentId)
-            => _quizAccess.GetQuizForStudent(assignmentId, studentId);
+            => _quizRepository.GetQuizForStudent(assignmentId, studentId);
 
         public int StartQuiz(int studentId, int assignmentId)
         {
-            if (_quizAccess.IsQuizAlreadySubmitted(studentId, assignmentId))
+            if (_attemptRepository.IsQuizAlreadySubmitted(studentId, assignmentId))
                 throw new InvalidOperationException("Quiz already submitted.");
 
-            return _quizAccess.GetOrCreateAttempt(studentId, assignmentId);
+            return _attemptRepository.GetOrCreateAttempt(studentId, assignmentId);
         }
 
         public void SaveAnswer(int attemptId, int questionId, int answerId)
         {
-            if (_quizAccess.AttemptIsSubmitted(attemptId))
+            if (_attemptRepository.AttemptIsSubmitted(attemptId))
                 throw new InvalidOperationException("Quiz already submitted.");
 
-            _quizAccess.SaveStudentAnswer(attemptId, questionId, answerId);
+            _attemptRepository.SaveStudentAnswer(attemptId, questionId, answerId);
         }
 
         public void SubmitQuiz(int attemptId)
         {
-            if (_quizAccess.AttemptIsSubmitted(attemptId))
+            if (_attemptRepository.AttemptIsSubmitted(attemptId))
                 throw new InvalidOperationException("Quiz already submitted.");
 
-            int score = _quizAccess.CalculateScore(attemptId);
-            _quizAccess.SubmitAttempt(attemptId, score);
+            int score = _attemptRepository.CalculateScore(attemptId);
+            _attemptRepository.SubmitAttempt(attemptId, score);
         }
 
         public bool IsQuizAlreadySubmitted(int studentId, int assignmentId)
-            => _quizAccess.IsQuizAlreadySubmitted(studentId, assignmentId);
+            => _attemptRepository.IsQuizAlreadySubmitted(studentId, assignmentId);
     }
 }

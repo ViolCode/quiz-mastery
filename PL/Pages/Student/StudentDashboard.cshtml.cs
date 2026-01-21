@@ -12,9 +12,9 @@ namespace PL.Pages.Student
     [Authorize(Roles = nameof(Role.Student))]
     public class StudentDashboardModel : PageModel
     {
-        private readonly IUserAccess _userAccess;
+        private readonly IUserRepository _userAccess;
 
-        public StudentDashboardModel(IUserAccess userAccess)
+        public StudentDashboardModel(IUserRepository userAccess)
         {
             _userAccess = userAccess;
         }

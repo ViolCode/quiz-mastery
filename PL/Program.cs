@@ -28,11 +28,15 @@ builder.Services.AddAuthentication("MyCookie")
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddScoped<IRoleMapper, RoleMapper>();
-builder.Services.AddScoped<IUserAccess>(sp =>
-    new DAL.Repositorys.UserAccess(connectionString, sp.GetRequiredService<IRoleMapper>()));
+builder.Services.AddScoped<IUserRepository>(sp =>
+    new DAL.Repositories.UserRepository(connectionString, sp.GetRequiredService<IRoleMapper>()));
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IQuizAccess>(sp =>
-    new DAL.Repositorys.QuizAccess(connectionString));
+builder.Services.AddScoped<IQuizRepository>(sp =>
+    new DAL.Repositories.QuizRepository(connectionString));
+builder.Services.AddScoped<IAssignmentRepository>(sp =>
+    new DAL.Repositories.AssignmentRepository(connectionString));
+builder.Services.AddScoped<IAttemptRepository>(sp =>
+    new DAL.Repositories.AttemptRepository(connectionString));
 builder.Services.AddScoped<IQuizService, QuizService>();
 
 var app = builder.Build();

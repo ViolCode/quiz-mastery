@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Contracts.Interfaces
 {
-    public interface IUserAccess
+    public interface IUserRepository
     {
         UserDto? GetUserById(int id);
         UserDto? GetUserByEmail(string email);  

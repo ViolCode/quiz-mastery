@@ -8,9 +8,9 @@ namespace PL.Pages
     public class IndexModel : PageModel
     {
 
-        private readonly IUserAccess _userAccess;
+        private readonly IUserRepository _userAccess;
 
-        public IndexModel(IUserAccess userAccess)
+        public IndexModel(IUserRepository userAccess)
         {
             _userAccess = userAccess;
         }

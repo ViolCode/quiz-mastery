@@ -2,7 +2,7 @@ using Contracts.DTOs;
 using Contracts.Enums;
 using Contracts.Interfaces;
 using DAL.Models;
-using DAL.Repositorys;
+using DAL.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

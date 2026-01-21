@@ -11,23 +11,23 @@ namespace BLL.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserAccess _userAccess;
+        private readonly IUserRepository _userRepository;
 
-        public UserService(IUserAccess userAccess)
+        public UserService(IUserRepository userAccess)
         {
-            _userAccess = userAccess;
+            _userRepository = userAccess;
         }
 
         public void Register(UserDto user)
         {
-            var existing = _userAccess.GetUserByEmail(user.Email);
+            var existing = _userRepository.GetUserByEmail(user.Email);
             if (existing != null)
             {
                 throw new InvalidOperationException("An account with this email already exists.");
             }
 
             user.PasswordHash = PasswordHasher.Hash(user.PasswordHash);
-            _userAccess.CreateUser(user);
+            _userRepository.CreateUser(user);
         }
 
         public void UpdateProfile(UserDto user)
@@ -36,17 +36,17 @@ namespace BLL.Services
             {
                 user.PasswordHash = PasswordHasher.Hash(user.PasswordHash);
             }
-            _userAccess.UpdateUser(user);
+            _userRepository.UpdateUser(user);
         }
 
         public void DeleteAccount(int id)
         {
-            _userAccess.DeleteUser(id);
+            _userRepository.DeleteUser(id);
         }
 
         public UserDto? Login(string email, string password)
         {
-            var user = _userAccess.GetUserByEmail(email);
+            var user = _userRepository.GetUserByEmail(email);
             if (user == null) return null;
 
             return PasswordHasher.Verify(password, user.PasswordHash) ? user : null;
@@ -54,12 +54,12 @@ namespace BLL.Services
 
         public List<(int Id, string Name)> GetAllRoles()
         {
-            return _userAccess.GetAllRoles();
+            return _userRepository.GetAllRoles();
         }
 
         public List<UserDto> GetAllStudents()
         {
-            return _userAccess.GetAllStudents();
+            return _userRepository.GetAllStudents();
         }
     }
 }

@@ -12,7 +12,7 @@ namespace BLL.Tests
 {
     public class UserServiceTests
     {
-        private readonly Mock<IUserAccess> _userAccessMock = new();
+        private readonly Mock<IUserRepository> _userAccessMock = new();
         private readonly UserService _service;
 
         public UserServiceTests()

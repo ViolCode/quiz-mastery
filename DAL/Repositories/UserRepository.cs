@@ -9,14 +9,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DAL.Repositorys
+namespace DAL.Repositories
 {
-    public class UserAccess : IUserAccess
+    public class UserRepository : IUserRepository
     {
         private readonly string _connectionString;
         private readonly IRoleMapper _roleMapper;
 
-        public UserAccess(string connectionString, IRoleMapper roleMapper)
+        public UserRepository(string connectionString, IRoleMapper roleMapper)
         {
             _connectionString = connectionString;
             _roleMapper = roleMapper;
