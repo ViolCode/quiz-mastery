@@ -160,7 +160,7 @@ namespace DAL.Repositories
             var cmd = new SqlCommand(@"
         SELECT u.Id, u.Name, u.Email, u.Password_Hash, u.Role_Id
         FROM [User] u
-        WHERE u.Role_Id = 1", conn); // 1 = Student
+        WHERE u.Role_Id = 1", conn); 
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
